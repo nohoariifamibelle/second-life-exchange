@@ -1,36 +1,128 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Second Life Exchange
+Plateforme collaborative d'échange d'objets de seconde main
 
-## Getting Started
+## 🧩 Présentation
+Second Life Exchange est une application web permettant aux utilisateurs d'échanger des objets sans argent, dans un esprit d'économie circulaire. Chaque semaine, un thème d'échange est proposé, et la plateforme met en avant des suggestions générées automatiquement via l'API d'OpenAI.
+L'objectif : encourager les échanges responsables, la réparation, et sensibiliser aux enjeux écologiques.
 
-First, run the development server:
+---
+
+## 🚀 Stack Technique
+
+| Domaine         | Technologie |
+|-----------------|-------------|
+| Front-end       | Next.js     |
+| Back-end        | NestJS      |
+| Base de données | MongoDB     |
+| IA              | OpenAI API  |
+| Déploiement     | Vercel      |
+| Application     | PWA         |
+
+---
+
+## ✨ Fonctionnalités principales
+
+- Authentification et gestion de profil
+- Publication d'objets (photo, description, état, catégorie)
+- Suggestions automatiques d'objets via IA
+- Thèmes hebdomadaires d'échange
+- Système de matching (optionnel)
+- Espace de discussion communautaire
+- Section éducative : articles, vidéos, statistiques
+- Système de vote sur les meilleurs échanges
+- Notifications via PWA
+
+---
+
+## 📁 Architecture du projet
+
+```
+/frontend → Application Next.js
+/backend → API NestJS
+/database → Schémas, migrations
+/docs → UML, spécifications
+```
+
+---
+
+## ⚙️ Installation
+
+### Prérequis
+- Node.js 18+
+- Yarn ou npm
+- MongoDB Atlas ou local
+
+### Clone du projet
+```bash
+git clone https://github.com/nohoariifamibelle/second-life-exchange.git
+cd second-life-exchange
+```
+
+### Installation et démarrage
 
 ```bash
+# Installation des dépendances
+npm install
+
+# Démarrage en mode développement
 npm run dev
-# or
+# ou
 yarn dev
-# or
+# ou
 pnpm dev
-# or
+# ou
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvrez [http://localhost:3000](http://localhost:3000) dans votre navigateur pour voir le résultat.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🔐 Variables d'environnement
 
-## Learn More
+### Front (Next.js)
+```
+NEXT_PUBLIC_API_URL=
+NEXT_PUBLIC_OPENAI_MODEL=
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Back (NestJS)
+```
+MONGODB_URI=
+OPENAI_API_KEY=
+JWT_SECRET=
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🧪 Scripts utiles
 
-## Deploy on Vercel
+### Front
+```bash
+npm run dev       # Développement
+npm run build     # Build production
+npm run start     # Démarrage production
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Back
+```bash
+npm run start:dev   # Développement
+npm run build       # Compilation
+npm run start:prod  # Production
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 📚 En savoir plus
+
+Pour en savoir plus sur Next.js :
+
+- [Documentation Next.js](https://nextjs.org/docs)
+- [Learn Next.js](https://nextjs.org/learn)
+- [Dépôt GitHub Next.js](https://github.com/vercel/next.js)
+
+## 🚀 Déploiement
+
+Le moyen le plus simple de déployer cette application Next.js est d'utiliser la [plateforme Vercel](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme).
+
+Consultez la [documentation de déploiement Next.js](https://nextjs.org/docs/app/building-your-application/deploying) pour plus de détails.
