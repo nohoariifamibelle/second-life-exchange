@@ -25,6 +25,7 @@ frontend/public/worker-*.js.map
 # NestJS
 backend/dist/
 backend/*.tsbuildinfo
+backend/coverage/
 
 # Logs
 *.log
