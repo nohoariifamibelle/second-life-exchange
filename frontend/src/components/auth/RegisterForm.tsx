@@ -1,77 +1,76 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { registerUser } from "@/lib/api";
 import { Input } from "@/components/ui/Input";
-import type { RegisterData } from "@/types/auth";
+import { registerSchema, type RegisterFormData } from "@/schemas/auth";
+import { useState } from "react";
 
 export function RegisterForm() {
   const router = useRouter();
-  const [formData, setFormData] = useState<RegisterData>({
-    email: "",
-    password: "",
-    firstName: "",
-    lastName: "",
-  });
-  const [errors, setErrors] = useState<{ general?: string }>({});
-  const [loading, setLoading] = useState(false);
+  const [generalError, setGeneralError] = useState<string>("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrors({});
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    mode: "onBlur", // Validation au blur pour une meilleure UX
+  });
+
+  const onSubmit = async (data: RegisterFormData) => {
+    setGeneralError("");
 
     try {
-      await registerUser(formData);
-      router.push("/login"); // Rediriger vers connexion
+      await registerUser(data);
+      router.push("/login");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Une erreur est survenue";
-      setErrors({ general: message });
-    } finally {
-      setLoading(false);
+      setGeneralError(message);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <Input
         label="Email"
         type="email"
-        value={formData.email}
-        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-        required
+        error={errors.email?.message}
+        {...register("email")}
       />
+
       <Input
         label="Mot de passe"
         type="password"
-        value={formData.password}
-        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-        required
-      />
-      <Input
-        label="Prénom"
-        value={formData.firstName}
-        onChange={(e) =>
-          setFormData({ ...formData, firstName: e.target.value })
-        }
-        required
-      />
-      <Input
-        label="Nom"
-        value={formData.lastName}
-        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-        required
+        error={errors.password?.message}
+        {...register("password")}
       />
 
-      {errors.general && <p className="text-red-600">{errors.general}</p>}
+      <Input
+        label="Prénom"
+        error={errors.firstName?.message}
+        {...register("firstName")}
+      />
+
+      <Input
+        label="Nom"
+        error={errors.lastName?.message}
+        {...register("lastName")}
+      />
+
+      {generalError && (
+        <p className="text-red-600 text-sm">{generalError}</p>
+      )}
 
       <button
         type="submit"
-        disabled={loading}
-        className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        disabled={isSubmitting}
+        className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {loading ? "Inscription..." : "S'inscrire"}
+        {isSubmitting ? "Inscription..." : "S'inscrire"}
       </button>
     </form>
   );
