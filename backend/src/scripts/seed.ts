@@ -42,7 +42,10 @@ async function bootstrap() {
           createdCount++;
         }
       } catch (error) {
-        console.error(`❌ Error creating user ${userData.email}:`, error.message);
+        console.error(
+          `❌ Error creating user ${userData.email}:`,
+          error.message,
+        );
       }
     }
 

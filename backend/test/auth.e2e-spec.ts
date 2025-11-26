@@ -131,9 +131,7 @@ describe('AuthController (e2e)', () => {
         .expect(400)
         .expect((res) => {
           expect(res.body.message).toEqual(
-            expect.arrayContaining([
-              expect.stringContaining('mot de passe'),
-            ]),
+            expect.arrayContaining([expect.stringContaining('mot de passe')]),
           );
         });
     });
