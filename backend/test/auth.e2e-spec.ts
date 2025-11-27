@@ -75,11 +75,12 @@ describe('AuthController (e2e)', () => {
         .expect(201)
         .expect((res) => {
           // Vérification que l'utilisateur est bien créé avec toutes les propriétés attendues
-          expect(res.body).toHaveProperty('_id');
-          expect(res.body).toHaveProperty('email', validUser.email);
-          expect(res.body).toHaveProperty('firstName', validUser.firstName);
-          expect(res.body).toHaveProperty('lastName', validUser.lastName);
-          expect(res.body).toHaveProperty('isActive', true);
+          const body = res.body as { _id: string; email: string; firstName: string; lastName: string; isActive: boolean };
+          expect(body).toHaveProperty('_id');
+          expect(body.email).toBe(validUser.email);
+          expect(body.firstName).toBe(validUser.firstName);
+          expect(body.lastName).toBe(validUser.lastName);
+          expect(body.isActive).toBe(true);
           // Sécurité : le mot de passe ne doit JAMAIS être retourné dans la réponse
           expect(res.body).not.toHaveProperty('password');
         });
@@ -100,7 +101,8 @@ describe('AuthController (e2e)', () => {
         .send(validUser)
         .expect(409)
         .expect((res) => {
-          expect(res.body.message).toBe('Cet email est déjà utilisé');
+          const body = res.body as { message: string };
+          expect(body.message).toBe('Cet email est déjà utilisé');
         });
     });
 
@@ -114,7 +116,8 @@ describe('AuthController (e2e)', () => {
         })
         .expect(400)
         .expect((res) => {
-          expect(res.body.message).toEqual(
+          const body = res.body as { message: string[] };
+          expect(body.message).toEqual(
             expect.arrayContaining([expect.stringContaining('Email invalide')]),
           );
         });
@@ -130,7 +133,8 @@ describe('AuthController (e2e)', () => {
         })
         .expect(400)
         .expect((res) => {
-          expect(res.body.message).toEqual(
+          const body = res.body as { message: string[] };
+          expect(body.message).toEqual(
             expect.arrayContaining([expect.stringContaining('mot de passe')]),
           );
         });
@@ -156,13 +160,15 @@ describe('AuthController (e2e)', () => {
 
       // Vérification directe dans la base de données
       const usersCollection = connection.collection('users');
-      const user = await usersCollection.findOne({ email: validUser.email });
+      const user = await usersCollection.findOne({ email: validUser.email }) as { password: string } | null;
 
       expect(user).toBeDefined();
       // Le mot de passe ne doit JAMAIS être stocké en clair
-      expect(user.password).not.toBe(validUser.password);
-      // Vérification du format bcrypt : $2a$ ou $2b$ suivi de 56 caractères
-      expect(user.password).toMatch(/^\$2[ab]\$.{56}$/);
+      if (user) {
+        expect(user.password).not.toBe(validUser.password);
+        // Vérification du format bcrypt : $2a$ ou $2b$ suivi de 56 caractères
+        expect(user.password).toMatch(/^\$2[ab]\$.{56}$/);
+      }
     });
 
     // Test de validation : email manquant spécifiquement
@@ -176,7 +182,8 @@ describe('AuthController (e2e)', () => {
         })
         .expect(400)
         .expect((res) => {
-          expect(res.body.message).toEqual(
+          const body = res.body as { message: string[] };
+          expect(body.message).toEqual(
             expect.arrayContaining([expect.stringContaining('email')]),
           );
         });
@@ -193,7 +200,8 @@ describe('AuthController (e2e)', () => {
         })
         .expect(400)
         .expect((res) => {
-          expect(res.body.message).toEqual(
+          const body = res.body as { message: string[] };
+          expect(body.message).toEqual(
             expect.arrayContaining([
               expect.stringContaining('mot de passe doit contenir'),
             ]),
@@ -217,10 +225,11 @@ describe('AuthController (e2e)', () => {
         .expect(201);
 
       // L'email doit être nettoyé (trimmed) et en minuscules
-      expect(response.body.email).toBe('test@example.com');
+      const body = response.body as { email: string; firstName: string; lastName: string };
+      expect(body.email).toBe('test@example.com');
       // Les noms doivent être nettoyés (trimmed)
-      expect(response.body.firstName).toBe('John');
-      expect(response.body.lastName).toBe('Doe');
+      expect(body.firstName).toBe('John');
+      expect(body.lastName).toBe('Doe');
     });
   });
 });
