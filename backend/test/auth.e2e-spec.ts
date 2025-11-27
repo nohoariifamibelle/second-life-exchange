@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
+import type { Server } from 'http';
 import { AppModule } from './../src/app.module';
 import { Connection } from 'mongoose';
 import { getConnectionToken } from '@nestjs/mongoose';
@@ -11,6 +12,7 @@ import { getConnectionToken } from '@nestjs/mongoose';
  */
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
+  let httpServer: Server;
   let connection: Connection;
 
   beforeAll(async () => {
@@ -35,13 +37,18 @@ describe('AuthController (e2e)', () => {
 
     await app.init();
 
+    // Récupération du serveur HTTP typé pour éviter les warnings ESLint
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    httpServer = app.getHttpServer();
+
     // Récupération de la connexion MongoDB pour les nettoyages et vérifications
     connection = moduleFixture.get<Connection>(getConnectionToken());
   }, 30000); // Augmenter le timeout à 30 secondes
 
   afterAll(async () => {
     // Nettoyer la base de données de test
-    if (connection.readyState === 1) {
+    // ReadyState 1 = connected (STATES.connected from mongoose)
+    if (Number(connection.readyState) === 1) {
       await connection.dropDatabase();
       await connection.close();
     }
@@ -50,7 +57,8 @@ describe('AuthController (e2e)', () => {
 
   afterEach(async () => {
     // Nettoyer les utilisateurs après chaque test
-    if (connection.readyState === 1) {
+    // ReadyState 1 = connected (STATES.connected from mongoose)
+    if (Number(connection.readyState) === 1) {
       const collections = connection.collections;
       for (const key in collections) {
         await collections[key].deleteMany({});
@@ -69,13 +77,19 @@ describe('AuthController (e2e)', () => {
 
     // Test du cas nominal : inscription réussie
     it('should create a new user and return 201', () => {
-      return request(app.getHttpServer())
+      return request(httpServer)
         .post('/auth/register')
         .send(validUser)
         .expect(201)
         .expect((res) => {
           // Vérification que l'utilisateur est bien créé avec toutes les propriétés attendues
-          const body = res.body as { _id: string; email: string; firstName: string; lastName: string; isActive: boolean };
+          const body = res.body as {
+            _id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
+            isActive: boolean;
+          };
           expect(body).toHaveProperty('_id');
           expect(body.email).toBe(validUser.email);
           expect(body.firstName).toBe(validUser.firstName);
@@ -89,14 +103,14 @@ describe('AuthController (e2e)', () => {
     // Test de sécurité : prévention des doublons d'email
     it('should return 409 if email already exists', async () => {
       // Première inscription réussie
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post('/auth/register')
         .send(validUser)
         .expect(201);
 
       // Tentative de deuxième inscription avec le même email
       // Doit retourner un conflit (409) pour empêcher les doublons
-      return request(app.getHttpServer())
+      return request(httpServer)
         .post('/auth/register')
         .send(validUser)
         .expect(409)
@@ -108,7 +122,7 @@ describe('AuthController (e2e)', () => {
 
     // Test de validation : format d'email incorrect
     it('should return 400 if email is invalid', () => {
-      return request(app.getHttpServer())
+      return request(httpServer)
         .post('/auth/register')
         .send({
           ...validUser,
@@ -125,7 +139,7 @@ describe('AuthController (e2e)', () => {
 
     // Test de validation : mot de passe trop simple
     it('should return 400 if password is too weak', () => {
-      return request(app.getHttpServer())
+      return request(httpServer)
         .post('/auth/register')
         .send({
           ...validUser,
@@ -142,7 +156,7 @@ describe('AuthController (e2e)', () => {
 
     // Test de validation : champs obligatoires manquants
     it('should return 400 if required fields are missing', () => {
-      return request(app.getHttpServer())
+      return request(httpServer)
         .post('/auth/register')
         .send({
           email: 'test@example.com',
@@ -153,14 +167,16 @@ describe('AuthController (e2e)', () => {
 
     // Test de sécurité CRITIQUE : vérification du hachage du mot de passe
     it('should not store plain text password in database', async () => {
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post('/auth/register')
         .send(validUser)
         .expect(201);
 
       // Vérification directe dans la base de données
       const usersCollection = connection.collection('users');
-      const user = await usersCollection.findOne({ email: validUser.email }) as { password: string } | null;
+      const user = (await usersCollection.findOne({
+        email: validUser.email,
+      })) as { password: string } | null;
 
       expect(user).toBeDefined();
       // Le mot de passe ne doit JAMAIS être stocké en clair
@@ -173,7 +189,7 @@ describe('AuthController (e2e)', () => {
 
     // Test de validation : email manquant spécifiquement
     it('should return 400 if email is missing', () => {
-      return request(app.getHttpServer())
+      return request(httpServer)
         .post('/auth/register')
         .send({
           password: 'Password123!',
@@ -191,7 +207,7 @@ describe('AuthController (e2e)', () => {
 
     // Test de validation : complexité du mot de passe
     it('should return 400 if password does not meet complexity requirements', () => {
-      return request(app.getHttpServer())
+      return request(httpServer)
         .post('/auth/register')
         .send({
           ...validUser,
@@ -219,13 +235,17 @@ describe('AuthController (e2e)', () => {
         lastName: '  Doe  ',
       };
 
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post('/auth/register')
         .send(userWithSpaces)
         .expect(201);
 
       // L'email doit être nettoyé (trimmed) et en minuscules
-      const body = response.body as { email: string; firstName: string; lastName: string };
+      const body = response.body as {
+        email: string;
+        firstName: string;
+        lastName: string;
+      };
       expect(body.email).toBe('test@example.com');
       // Les noms doivent être nettoyés (trimmed)
       expect(body.firstName).toBe('John');

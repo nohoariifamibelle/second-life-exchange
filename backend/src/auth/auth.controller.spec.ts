@@ -70,9 +70,11 @@ describe('AuthController', () => {
       mockUsersService.create.mockResolvedValue(mockUser);
 
       // Act
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await controller.register(createUserDto);
 
       // Assert
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersService.create).toHaveBeenCalledWith(createUserDto);
       expect(result).toHaveProperty('_id');
       expect(result).toHaveProperty('email', 'test@example.com');
@@ -86,6 +88,7 @@ describe('AuthController', () => {
       mockUsersService.create.mockResolvedValue(mockUser);
 
       // Act
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await controller.register(createUserDto);
 
       // Assert
@@ -115,7 +118,9 @@ describe('AuthController', () => {
       await controller.register(createUserDto);
 
       // Assert
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersService.create).toHaveBeenCalledTimes(1);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersService.create).toHaveBeenCalledWith({
         email: 'test@example.com',
         password: 'Password123!',
