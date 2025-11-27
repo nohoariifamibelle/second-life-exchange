@@ -12,8 +12,10 @@ export class AuthController {
     const user = await this.usersService.create(createUserDto);
 
     // Ne pas retourner le mot de passe dans la réponse
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-unsafe-assignment
     const { password, ...result } = user.toObject();
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return result;
   }
 }

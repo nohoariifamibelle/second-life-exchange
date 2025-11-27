@@ -41,8 +41,9 @@ async function bootstrap() {
           );
           createdCount++;
         }
-      } catch (error) {
-        console.error(`❌ Error creating user ${userData.email}:`, error.message);
+      } catch (error: unknown) {
+        const err = error instanceof Error ? error : new Error(String(error));
+        console.error(`❌ Error creating user ${userData.email}:`, err.message);
       }
     }
 
@@ -56,11 +57,12 @@ async function bootstrap() {
     // Fermer l'application
     await app.close();
     process.exit(0);
-  } catch (error) {
-    console.error('\n❌ Seeding failed:', error.message);
-    console.error(error.stack);
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
+    console.error('\n❌ Seeding failed:', err.message);
+    console.error(err.stack);
     process.exit(1);
   }
 }
 
-bootstrap();
+void bootstrap();
