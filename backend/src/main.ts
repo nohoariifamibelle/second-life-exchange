@@ -1,25 +1,33 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
 
-  // Activer CORS
+  // Activer CORS - supporte plusieurs origines séparées par des virgules
+  const corsOriginConfig =
+    configService.get<string>('CORS_ORIGIN') || 'http://localhost:3000';
+  const corsOrigins = corsOriginConfig.split(',').map((origin) => origin.trim());
+
   app.enableCors({
-    origin: 'http://localhost:3000', // Port du frontend Next.js
+    origin: corsOrigins.length === 1 ? corsOrigins[0] : corsOrigins,
     credentials: true,
   });
 
-  //Activer la validation globale
+  // Activer la validation globale
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true, // Retire les propriétés non définies dans le DTO
-      forbidNonWhitelisted: true, //Rejette les requêtes avec des propriétés non autorisées
+      forbidNonWhitelisted: true, // Rejette les requêtes avec des propriétés non autorisées
       transform: true, // Transforme les types automatiquement
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3000);
+  const port = configService.get<number>('PORT') || 3001;
+  await app.listen(port);
+  console.log(`Application is running on: http://localhost:${port}`);
 }
 void bootstrap();
