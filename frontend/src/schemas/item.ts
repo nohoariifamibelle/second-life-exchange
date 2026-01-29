@@ -133,17 +133,16 @@ export const createItemSchema = z.object({
 
   category: z.enum(
     ['electronics', 'clothing', 'furniture', 'books', 'sports', 'toys', 'other'],
-    { errorMap: () => ({ message: 'Veuillez sélectionner une catégorie' }) }
+    { message: 'Veuillez sélectionner une catégorie' }
   ),
 
   condition: z.enum(['new', 'very_good', 'good', 'fair'], {
-    errorMap: () => ({ message: 'Veuillez sélectionner un état' }),
+    message: 'Veuillez sélectionner un état',
   }),
 
   images: z
     .array(z.string())
     .max(3, 'Maximum 3 images autorisées')
-    .optional()
     .default([]),
 
   city: z
