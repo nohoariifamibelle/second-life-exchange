@@ -142,8 +142,7 @@ export const createItemSchema = z.object({
 
   images: z
     .array(z.string())
-    .max(3, 'Maximum 3 images autorisées')
-    .default([]),
+    .max(3, 'Maximum 3 images autorisées'),
 
   city: z
     .string()

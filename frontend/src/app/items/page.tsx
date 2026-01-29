@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { getItems, type ItemsQueryParams } from "@/lib/items-api";
@@ -15,6 +15,14 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function ItemsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="text-lg text-gray-600">Chargement...</div></div>}>
+      <ItemsPageContent />
+    </Suspense>
+  );
+}
+
+function ItemsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
