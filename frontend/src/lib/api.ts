@@ -27,10 +27,15 @@ export async function registerUser(data: RegisterFormData): Promise<User> {
     body: JSON.stringify(data),
   });
 
-  const jsonData = await response.json();
-
+  // Gérer les erreurs HTTP sans corps JSON (ex: 405, 502)
   if (!response.ok) {
-    // Valider l'erreur API avec Zod
+    let jsonData;
+    try {
+      jsonData = await response.json();
+    } catch {
+      throw new Error(`Erreur serveur (${response.status}): ${response.statusText}`);
+    }
+
     const errorResult = apiErrorSchema.safeParse(jsonData);
 
     if (errorResult.success) {
@@ -42,6 +47,8 @@ export async function registerUser(data: RegisterFormData): Promise<User> {
 
     throw new Error("Erreur lors de l'inscription");
   }
+
+  const jsonData = await response.json();
 
   // Valider la réponse utilisateur avec Zod
   const userResult = userSchema.safeParse(jsonData);
@@ -67,9 +74,15 @@ export async function loginUser(data: LoginFormData): Promise<LoginResponse> {
     body: JSON.stringify(data),
   });
 
-  const jsonData = await response.json();
-
+  // Gérer les erreurs HTTP sans corps JSON (ex: 405, 502)
   if (!response.ok) {
+    let jsonData;
+    try {
+      jsonData = await response.json();
+    } catch {
+      throw new Error(`Erreur serveur (${response.status}): ${response.statusText}`);
+    }
+
     const errorResult = apiErrorSchema.safeParse(jsonData);
 
     if (errorResult.success) {
@@ -81,6 +94,8 @@ export async function loginUser(data: LoginFormData): Promise<LoginResponse> {
 
     throw new Error("Erreur lors de la connexion");
   }
+
+  const jsonData = await response.json();
 
   const loginResult = loginResponseSchema.safeParse(jsonData);
 
