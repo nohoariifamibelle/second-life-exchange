@@ -14,6 +14,7 @@ import {
   categoryLabels,
   conditionLabels,
 } from "@/schemas/item";
+import ImageUpload from "@/components/ui/ImageUpload";
 
 export default function NewItemPage() {
   const { user, accessToken, isLoading, isAuthenticated } = useAuth();
@@ -25,6 +26,7 @@ export default function NewItemPage() {
     handleSubmit,
     formState: { errors },
     setValue,
+    watch,
   } = useForm<CreateItemFormData>({
     resolver: zodResolver(createItemSchema),
     defaultValues: {
@@ -227,12 +229,17 @@ export default function NewItemPage() {
               </div>
             </div>
 
-            {/* Note sur les images */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-700">
-                <strong>Note :</strong> L&apos;upload d&apos;images sera disponible prochainement. Pour l&apos;instant, les objets seront publiés sans photo.
-              </p>
-            </div>
+            {/* Images */}
+            {accessToken && (
+              <ImageUpload
+                value={watch("images") || []}
+                onChange={(urls) => setValue("images", urls)}
+                accessToken={accessToken}
+                maxImages={3}
+                disabled={isSubmitting}
+                error={errors.images?.message}
+              />
+            )}
 
             {/* Boutons */}
             <div className="flex gap-4">
