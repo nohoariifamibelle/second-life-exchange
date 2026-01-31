@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { ItemsModule } from './items/items.module';
 import { ExchangesModule } from './exchanges/exchanges.module';
 import { UploadModule } from './upload/upload.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -35,6 +36,8 @@ import { UploadModule } from './upload/upload.module';
     ExchangesModule,
 
     UploadModule,
+
+    AiModule,
   ],
   controllers: [AppController],
   providers: [AppService],
