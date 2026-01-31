@@ -1,6 +1,7 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Request } from '@nestjs/common';
 import { AiService } from './ai.service';
 import { GenerateDescriptionDto } from './dto/generate-description.dto';
+import { SuggestionsResponseDto } from './dto/exchange-suggestion.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('ai')
@@ -18,5 +19,10 @@ export class AiController {
     );
 
     return { description };
+  }
+
+  @Get('suggestions')
+  async getSuggestions(@Request() req): Promise<SuggestionsResponseDto> {
+    return this.aiService.getSuggestions(req.user.userId);
   }
 }
