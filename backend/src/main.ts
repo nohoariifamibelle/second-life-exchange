@@ -20,8 +20,13 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Activer les headers de sécurité
-  app.use(helmet());
+  // Activer les headers de sécurité (compatible avec CORS)
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+    }),
+  );
 
   // Activer la validation globale
   app.useGlobalPipes(
