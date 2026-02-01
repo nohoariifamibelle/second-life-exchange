@@ -369,4 +369,86 @@ export class ExchangesService {
       totalReviews: reviews.length,
     };
   }
+
+  /**
+   * Échanges complétés par catégorie (pour analyse des tendances)
+   */
+  async getCompletedExchangesByCategory(
+    days: number = 7,
+  ): Promise<{ category: string; completedCount: number }[]> {
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    return this.exchangeModel
+      .aggregate([
+        {
+          $match: {
+            status: ExchangeStatus.COMPLETED,
+            completedAt: { $gte: since },
+          },
+        },
+        {
+          $lookup: {
+            from: 'items',
+            localField: 'requestedItem',
+            foreignField: '_id',
+            as: 'requestedItemData',
+          },
+        },
+        { $unwind: '$requestedItemData' },
+        {
+          $group: {
+            _id: '$requestedItemData.category',
+            completedCount: { $sum: 1 },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            category: '$_id',
+            completedCount: 1,
+          },
+        },
+      ])
+      .exec();
+  }
+
+  /**
+   * Demandes en attente par catégorie (indique la demande)
+   */
+  async getPendingRequestsByCategory(): Promise<
+    { category: string; pendingCount: number }[]
+  > {
+    return this.exchangeModel
+      .aggregate([
+        {
+          $match: {
+            status: ExchangeStatus.PENDING,
+          },
+        },
+        {
+          $lookup: {
+            from: 'items',
+            localField: 'requestedItem',
+            foreignField: '_id',
+            as: 'requestedItemData',
+          },
+        },
+        { $unwind: '$requestedItemData' },
+        {
+          $group: {
+            _id: '$requestedItemData.category',
+            pendingCount: { $sum: 1 },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            category: '$_id',
+            pendingCount: 1,
+          },
+        },
+      ])
+      .exec();
+  }
 }

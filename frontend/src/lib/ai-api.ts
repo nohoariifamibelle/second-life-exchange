@@ -81,3 +81,54 @@ export async function getSuggestions(
 
   return jsonData;
 }
+
+// Types pour les tendances communautaires
+export type TrendStatus = 'hot' | 'rising' | 'stable';
+
+export interface CategoryTrend {
+  category: string;
+  categoryLabel: string;
+  trendScore: number;
+  status: TrendStatus;
+  recentExchanges: number;
+  recentRequests: number;
+  availableItems: number;
+  totalViews: number;
+  aiDescription: string;
+  aiRecommendation: string;
+}
+
+export interface CommunityTrendsResponse {
+  trends: CategoryTrend[];
+  generatedAt: string;
+  weekNumber: number;
+  message?: string;
+}
+
+export async function getCommunityTrends(
+  accessToken: string,
+  city?: string
+): Promise<CommunityTrendsResponse> {
+  const params = city ? `?city=${encodeURIComponent(city)}` : '';
+  const response = await fetch(`${API_URL}/ai/trends${params}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  const jsonData = await response.json();
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error('Session expirée. Veuillez vous reconnecter.');
+    }
+    const errorMessage = Array.isArray(jsonData.message)
+      ? jsonData.message.join(', ')
+      : jsonData.message || 'Erreur lors de la récupération des tendances';
+    throw new Error(errorMessage);
+  }
+
+  return jsonData;
+}
