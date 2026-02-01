@@ -29,10 +29,16 @@ export class UsersService {
     // Hacher le mot de passe avec bcrypt (10 rounds)
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-    // Créer le nouvel utilisateur avec le password haché
+    // Extraire acceptedTerms du DTO (ne pas le stocker dans le document)
+    // Note: La validation @Equals(true) dans le DTO garantit déjà que acceptedTerms est true
+    const { acceptedTerms: _acceptedTerms, ...userData } = createUserDto;
+    void _acceptedTerms; // Variable extraite pour exclusion, validée par le DTO
+
+    // Créer le nouvel utilisateur avec le password haché et la date d'acceptation
     const createdUser = await this.userModel.create({
-      ...createUserDto,
+      ...userData,
       password: hashedPassword,
+      acceptedTermsAt: new Date(),
     });
 
     return createdUser;

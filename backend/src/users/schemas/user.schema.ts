@@ -37,6 +37,9 @@ export class User {
 
   @Prop({ default: '' })
   avatar: string;
+
+  @Prop({ type: Date, default: null })
+  acceptedTermsAt: Date | null;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
