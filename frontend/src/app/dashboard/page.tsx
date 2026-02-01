@@ -18,12 +18,18 @@ export default function DashboardPage() {
   const [suggestions, setSuggestions] = useState<ExchangeSuggestion[]>([]);
   const [suggestionsMessage, setSuggestionsMessage] = useState<string>("");
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Éviter les erreurs d'hydratation en attendant le montage côté client
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (isMounted && !isLoading && !isAuthenticated) {
       router.push("/login");
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isMounted, isLoading, isAuthenticated, router]);
 
   // Charger les compteurs
   useEffect(() => {
@@ -84,7 +90,8 @@ export default function DashboardPage() {
     }
   }, [isAuthenticated, accessToken]);
 
-  if (isLoading) {
+  // Afficher le loader tant que le composant n'est pas monté ou que l'auth est en cours
+  if (!isMounted || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-lg text-gray-600">Chargement...</div>
