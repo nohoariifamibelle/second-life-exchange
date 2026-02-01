@@ -6,6 +6,14 @@ export class GenerateDescriptionDto {
   title: string;
 
   @IsString()
-  @IsIn(['electronics', 'clothing', 'furniture', 'books', 'sports', 'toys', 'other'])
+  @IsIn([
+    'electronics',
+    'clothing',
+    'furniture',
+    'books',
+    'sports',
+    'toys',
+    'other',
+  ])
   category: string;
 }

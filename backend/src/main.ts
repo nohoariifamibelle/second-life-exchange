@@ -11,7 +11,9 @@ async function bootstrap() {
   // Activer CORS - supporte plusieurs origines séparées par des virgules
   const corsOriginConfig =
     configService.get<string>('CORS_ORIGIN') || 'http://localhost:3000';
-  const corsOrigins = corsOriginConfig.split(',').map((origin) => origin.trim());
+  const corsOrigins = corsOriginConfig
+    .split(',')
+    .map((origin) => origin.trim());
 
   app.enableCors({
     origin: corsOrigins.length === 1 ? corsOrigins[0] : corsOrigins,

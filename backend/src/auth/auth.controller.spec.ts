@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException } from '@nestjs/common';
 import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 
@@ -11,6 +12,24 @@ describe('AuthController', () => {
   const mockUsersService = {
     create: jest.fn(),
     findByEmail: jest.fn(),
+  };
+
+  // Mock AuthService avec les méthodes utilisées par AuthController
+  const mockAuthService = {
+    login: jest.fn().mockResolvedValue({
+      accessToken: 'mock-access-token',
+      refreshToken: 'mock-refresh-token',
+      user: {
+        id: '507f1f77bcf86cd799439011',
+        email: 'test@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        role: 'user',
+      },
+    }),
+    refreshToken: jest.fn().mockReturnValue({
+      accessToken: 'new-mock-access-token',
+    }),
   };
 
   const mockUser = {
@@ -41,6 +60,10 @@ describe('AuthController', () => {
         {
           provide: UsersService,
           useValue: mockUsersService,
+        },
+        {
+          provide: AuthService,
+          useValue: mockAuthService,
         },
       ],
     }).compile();

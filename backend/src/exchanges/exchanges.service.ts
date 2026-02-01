@@ -181,9 +181,7 @@ export class ExchangesService {
 
     // Vérifier que l'échange est en attente
     if (exchange.status !== ExchangeStatus.PENDING) {
-      throw new BadRequestException(
-        'Cette proposition a déjà été traitée',
-      );
+      throw new BadRequestException('Cette proposition a déjà été traitée');
     }
 
     const { response, message } = respondExchangeDto;
@@ -325,9 +323,7 @@ export class ExchangesService {
     }
 
     // Déterminer qui est noté
-    const reviewedUserId = isProposer
-      ? exchange.receiver
-      : exchange.proposer;
+    const reviewedUserId = isProposer ? exchange.receiver : exchange.proposer;
 
     // Vérifier qu'un avis n'a pas déjà été laissé
     const existingReview = await this.reviewModel
