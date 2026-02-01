@@ -25,6 +25,20 @@ function sanitizeObject<T>(obj: T): T {
 }
 
 /**
+ * Sanitize les propriétés d'un objet en place (pour les objets read-only comme req.query)
+ */
+function sanitizeInPlace(obj: Record<string, any>): void {
+  if (!obj || typeof obj !== 'object') return;
+
+  for (const key of Object.keys(obj)) {
+    const sanitized = sanitizeObject(obj[key]);
+    if (obj[key] !== sanitized) {
+      obj[key] = sanitized;
+    }
+  }
+}
+
+/**
  * Middleware Express pour la protection contre les injections NoSQL.
  * À utiliser avec app.use() dans main.ts
  *
@@ -44,13 +58,15 @@ export function sanitizeMiddleware(
   }
 
   // Sanitize query parameters (GET ?param=value)
+  // Note: req.query est read-only dans Express 5+, on modifie les propriétés individuellement
   if (req.query && typeof req.query === 'object') {
-    req.query = sanitizeObject(req.query);
+    sanitizeInPlace(req.query as Record<string, any>);
   }
 
   // Sanitize route parameters (/route/:id)
+  // Note: req.params peut aussi être read-only selon la configuration
   if (req.params && typeof req.params === 'object') {
-    req.params = sanitizeObject(req.params);
+    sanitizeInPlace(req.params as Record<string, any>);
   }
 
   next();
