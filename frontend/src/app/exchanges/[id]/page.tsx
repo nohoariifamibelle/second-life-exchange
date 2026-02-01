@@ -266,23 +266,29 @@ export default function ExchangeDetailPage() {
               <p className="text-sm text-gray-500 mb-2">
                 {isProposer ? 'Objet demandé' : 'Votre objet'}
               </p>
-              <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                <div className="w-12 h-12 bg-gray-200 rounded overflow-hidden">
-                  {exchange.requestedItem.images && exchange.requestedItem.images.length > 0 ? (
-                    <img
-                      src={exchange.requestedItem.images[0]}
-                      alt={exchange.requestedItem.title || ''}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">?</div>
-                  )}
+              {exchange.requestedItem ? (
+                <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                  <div className="w-12 h-12 bg-gray-200 rounded overflow-hidden">
+                    {exchange.requestedItem.images && exchange.requestedItem.images.length > 0 ? (
+                      <img
+                        src={exchange.requestedItem.images[0]}
+                        alt={exchange.requestedItem.title || ''}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">?</div>
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-800">{exchange.requestedItem.title || 'Sans titre'}</p>
+                    <p className="text-sm text-gray-500">{exchange.requestedItem.city}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-gray-800">{exchange.requestedItem.title || 'Sans titre'}</p>
-                  <p className="text-sm text-gray-500">{exchange.requestedItem.city}</p>
+              ) : (
+                <div className="p-3 bg-gray-50 rounded-lg text-gray-500 italic">
+                  Objet supprimé ou indisponible
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

@@ -58,13 +58,16 @@ export type ExchangeItem = z.infer<typeof exchangeItemSchema>;
 
 /**
  * Schéma d'un échange
+ * Note: requestedItem et offeredItems peuvent être null si les objets ont été supprimés
  */
 export const exchangeSchema = z.object({
   id: z.string(),
   proposer: exchangeUserSchema,
   receiver: exchangeUserSchema,
-  offeredItems: z.array(exchangeItemSchema),
-  requestedItem: exchangeItemSchema,
+  offeredItems: z.array(exchangeItemSchema.nullable()).transform((items) =>
+    items.filter((item): item is z.infer<typeof exchangeItemSchema> => item !== null)
+  ),
+  requestedItem: exchangeItemSchema.nullable(),
   message: z.string(),
   status: z.string(),
   responseMessage: z.string(),

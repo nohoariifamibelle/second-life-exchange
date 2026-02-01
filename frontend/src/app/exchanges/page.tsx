@@ -172,15 +172,21 @@ export default function ExchangesPage() {
 
                     {/* Objet demandé */}
                     <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
-                      {exchange.requestedItem.images && exchange.requestedItem.images.length > 0 ? (
-                        <img
-                          src={exchange.requestedItem.images[0]}
-                          alt={exchange.requestedItem.title || ''}
-                          className="w-full h-full object-cover"
-                        />
+                      {exchange.requestedItem ? (
+                        exchange.requestedItem.images && exchange.requestedItem.images.length > 0 ? (
+                          <img
+                            src={exchange.requestedItem.images[0]}
+                            alt={exchange.requestedItem.title || ''}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                            ?
+                          </div>
+                        )
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                          ?
+                          ✕
                         </div>
                       )}
                     </div>
@@ -205,7 +211,11 @@ export default function ExchangesPage() {
 
                       <p className="text-gray-800 font-medium">
                         {exchange.offeredItems.length} objet{exchange.offeredItems.length > 1 ? 's' : ''} proposé{exchange.offeredItems.length > 1 ? 's' : ''}{' '}
-                        contre &quot;{exchange.requestedItem.title}&quot;
+                        contre {exchange.requestedItem ? (
+                          <>&quot;{exchange.requestedItem.title}&quot;</>
+                        ) : (
+                          <span className="text-gray-400 italic">objet supprimé</span>
+                        )}
                       </p>
 
                       <p className="text-sm text-gray-500 mt-1">
