@@ -7,6 +7,7 @@ import {
   IsMongoId,
   MaxLength,
 } from 'class-validator';
+import { TrimAndSanitize } from '../../common';
 
 export class CreateExchangeDto {
   // IDs des objets proposés
@@ -23,6 +24,7 @@ export class CreateExchangeDto {
 
   // Message optionnel
   @IsOptional()
+  @TrimAndSanitize()
   @IsString()
   @MaxLength(500, { message: 'Le message ne peut pas dépasser 500 caractères' })
   message?: string;
