@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { getItems, type ItemsQueryParams } from "@/lib/items-api";
+import { getItems, getMyItems, type ItemsQueryParams } from "@/lib/items-api";
 import {
   type Item,
   type Pagination,
@@ -25,7 +25,10 @@ export default function ItemsPage() {
 function ItemsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, accessToken } = useAuth();
+
+  // Mode "Mes objets" si le paramètre my=true est présent
+  const isMyItemsMode = searchParams.get("my") === "true";
 
   const [items, setItems] = useState<Item[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
@@ -40,24 +43,45 @@ function ItemsPageContent() {
 
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
 
+  // Rediriger vers la connexion si "Mes objets" sans être authentifié
+  useEffect(() => {
+    if (isMyItemsMode && !isAuthenticated) {
+      router.push("/login?redirect=/items?my=true");
+    }
+  }, [isMyItemsMode, isAuthenticated, router]);
+
   // Charger les objets
   useEffect(() => {
+    // Ne pas charger si on attend une redirection vers login
+    if (isMyItemsMode && !accessToken) {
+      return;
+    }
+
     const loadItems = async () => {
       setIsLoading(true);
       setError(null);
 
       try {
-        const params: ItemsQueryParams = {
-          page: currentPage,
-          limit: 12,
-        };
+        let result;
 
-        if (category) params.category = category;
-        if (condition) params.condition = condition;
-        if (city) params.city = city;
-        if (search) params.search = search;
+        if (isMyItemsMode && accessToken) {
+          // Mode "Mes objets" : charger uniquement mes objets
+          result = await getMyItems(accessToken, currentPage, 12);
+        } else {
+          // Mode normal : charger tous les objets avec filtres
+          const params: ItemsQueryParams = {
+            page: currentPage,
+            limit: 12,
+          };
 
-        const result = await getItems(params);
+          if (category) params.category = category;
+          if (condition) params.condition = condition;
+          if (city) params.city = city;
+          if (search) params.search = search;
+
+          result = await getItems(params);
+        }
+
         setItems(result.items);
         setPagination(result.pagination);
       } catch (err) {
@@ -68,7 +92,7 @@ function ItemsPageContent() {
     };
 
     loadItems();
-  }, [currentPage, category, condition, city, search]);
+  }, [currentPage, category, condition, city, search, isMyItemsMode, accessToken]);
 
   // Appliquer les filtres
   const applyFilters = () => {
@@ -135,9 +159,22 @@ function ItemsPageContent() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Objets disponibles</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">
+            {isMyItemsMode ? "Mes objets" : "Objets disponibles"}
+          </h1>
+          {isMyItemsMode && (
+            <Link
+              href="/items"
+              className="text-green-600 hover:text-green-700 text-sm font-medium"
+            >
+              Voir tous les objets
+            </Link>
+          )}
+        </div>
 
-        {/* Filtres */}
+        {/* Filtres (masqués en mode "Mes objets") */}
+        {!isMyItemsMode && (
         <div className="bg-white rounded-lg shadow p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             {/* Recherche */}
@@ -223,6 +260,7 @@ function ItemsPageContent() {
             </div>
           </div>
         </div>
+        )}
 
         {/* Contenu */}
         {isLoading ? (
@@ -235,13 +273,15 @@ function ItemsPageContent() {
           </div>
         ) : items.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg shadow">
-            <p className="text-gray-600 mb-4">Aucun objet trouvé</p>
+            <p className="text-gray-600 mb-4">
+              {isMyItemsMode ? "Vous n'avez pas encore publié d'objet" : "Aucun objet trouvé"}
+            </p>
             {isAuthenticated && (
               <Link
                 href="/items/new"
                 className="inline-block px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
               >
-                Publiez le premier objet !
+                {isMyItemsMode ? "Publier mon premier objet" : "Publiez le premier objet !"}
               </Link>
             )}
           </div>
