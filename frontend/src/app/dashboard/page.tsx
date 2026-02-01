@@ -6,8 +6,9 @@ import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { getMyItemsCount } from "@/lib/items-api";
 import { getPendingCount } from "@/lib/exchanges-api";
-import { getSuggestions, ExchangeSuggestion } from "@/lib/ai-api";
+import { getSuggestions, ExchangeSuggestion, getCommunityTrends, CategoryTrend } from "@/lib/ai-api";
 import { SuggestionCard } from "@/components/SuggestionCard";
+import { TrendCard } from "@/components/TrendCard";
 
 export default function DashboardPage() {
   const { user, accessToken, isLoading, isAuthenticated, logout } = useAuth();
@@ -18,6 +19,10 @@ export default function DashboardPage() {
   const [suggestions, setSuggestions] = useState<ExchangeSuggestion[]>([]);
   const [suggestionsMessage, setSuggestionsMessage] = useState<string>("");
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(true);
+  const [trends, setTrends] = useState<CategoryTrend[]>([]);
+  const [trendsMessage, setTrendsMessage] = useState<string>("");
+  const [isLoadingTrends, setIsLoadingTrends] = useState(true);
+  const [trendsWeek, setTrendsWeek] = useState<number>(0);
   const [isMounted, setIsMounted] = useState(false);
 
   // Éviter les erreurs d'hydratation en attendant le montage côté client
@@ -87,6 +92,31 @@ export default function DashboardPage() {
 
     if (isAuthenticated && accessToken) {
       loadSuggestions();
+    }
+  }, [isAuthenticated, accessToken]);
+
+  // Charger les tendances communautaires
+  useEffect(() => {
+    const loadTrends = async () => {
+      if (!accessToken) return;
+
+      try {
+        const response = await getCommunityTrends(accessToken);
+        setTrends(response.trends);
+        setTrendsWeek(response.weekNumber);
+        if (response.message) {
+          setTrendsMessage(response.message);
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement des tendances:", error);
+        setTrendsMessage("Impossible de charger les tendances");
+      } finally {
+        setIsLoadingTrends(false);
+      }
+    };
+
+    if (isAuthenticated && accessToken) {
+      loadTrends();
     }
   }, [isAuthenticated, accessToken]);
 
@@ -216,6 +246,76 @@ export default function DashboardPage() {
             <p className="text-gray-500">
               Vous avez {itemsCount} objet{itemsCount > 1 ? "s" : ""} publié{itemsCount > 1 ? "s" : ""}.
             </p>
+          )}
+        </div>
+
+        {/* Section Tendances Communautaires */}
+        <div className="bg-white rounded-lg shadow p-6 mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-gray-800">Tendances de la communauté</h3>
+              <span className="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full">
+                Semaine {trendsWeek}
+              </span>
+              <span className="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">
+                IA
+              </span>
+            </div>
+          </div>
+
+          {isLoadingTrends ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="flex flex-col items-center gap-3">
+                <svg
+                  className="animate-spin h-8 w-8 text-green-600"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                <p className="text-gray-500">Analyse des tendances en cours...</p>
+              </div>
+            </div>
+          ) : trends.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="mb-4">
+                <svg
+                  className="w-12 h-12 mx-auto text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  />
+                </svg>
+              </div>
+              <p className="text-gray-500">
+                {trendsMessage || "Pas de tendances disponibles pour le moment"}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {trends.map((trend) => (
+                <TrendCard key={trend.category} trend={trend} />
+              ))}
+            </div>
           )}
         </div>
 

@@ -7,10 +7,16 @@ import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
 import { Types } from 'mongoose';
 import { ItemsService } from '../items/items.service';
+import { ExchangesService } from '../exchanges/exchanges.service';
 import {
   ExchangeSuggestionDto,
   SuggestionsResponseDto,
 } from './dto/exchange-suggestion.dto';
+import {
+  CategoryTrendDto,
+  CommunityTrendsResponseDto,
+  TrendStatus,
+} from './dto/community-trends.dto';
 
 @Injectable()
 export class AiService {
@@ -19,6 +25,7 @@ export class AiService {
   constructor(
     private configService: ConfigService,
     private itemsService: ItemsService,
+    private exchangesService: ExchangesService,
   ) {
     const apiKey = this.configService.get<string>('OPENAI_API_KEY');
 
@@ -254,5 +261,205 @@ Réponds en JSON uniquement avec ce format :
         'Service IA temporairement indisponible',
       );
     }
+  }
+
+  async getCommunityTrends(city?: string): Promise<CommunityTrendsResponseDto> {
+    const categoryLabels: Record<string, string> = {
+      electronics: 'Électronique',
+      clothing: 'Vêtements',
+      furniture: 'Meubles',
+      books: 'Livres',
+      sports: 'Sports',
+      toys: 'Jouets',
+      other: 'Autre',
+    };
+
+    // Récupérer les statistiques en parallèle
+    const [categoryStats, completedExchanges, pendingRequests] =
+      await Promise.all([
+        this.itemsService.getCategoryStats(city),
+        this.exchangesService.getCompletedExchangesByCategory(7),
+        this.exchangesService.getPendingRequestsByCategory(),
+      ]);
+
+    // Construire les données par catégorie
+    const categories = Object.keys(categoryLabels);
+    const categoryData = categories.map((category) => {
+      const stats = categoryStats.find((s) => s.category === category) || {
+        availableCount: 0,
+        totalViews: 0,
+      };
+      const exchanges = completedExchanges.find(
+        (e) => e.category === category,
+      ) || { completedCount: 0 };
+      const requests = pendingRequests.find((r) => r.category === category) || {
+        pendingCount: 0,
+      };
+
+      // Calcul du ratio demande/offre
+      const demandSupplyRatio =
+        stats.availableCount > 0
+          ? requests.pendingCount / stats.availableCount
+          : requests.pendingCount > 0
+            ? 2
+            : 0;
+
+      // Déterminer le statut
+      let status: TrendStatus;
+      if (
+        demandSupplyRatio > 1 ||
+        (requests.pendingCount > 3 && stats.availableCount < 5)
+      ) {
+        status = TrendStatus.HOT;
+      } else if (exchanges.completedCount > 2 || stats.totalViews > 50) {
+        status = TrendStatus.RISING;
+      } else {
+        status = TrendStatus.STABLE;
+      }
+
+      // Calcul du score de tendance (0-100)
+      const trendScore = Math.min(
+        100,
+        Math.round(
+          exchanges.completedCount * 15 +
+            requests.pendingCount * 10 +
+            stats.totalViews / 10 +
+            (demandSupplyRatio > 1 ? 20 : 0),
+        ),
+      );
+
+      return {
+        category,
+        categoryLabel: categoryLabels[category],
+        availableItems: stats.availableCount,
+        totalViews: stats.totalViews,
+        recentExchanges: exchanges.completedCount,
+        recentRequests: requests.pendingCount,
+        trendScore,
+        status,
+      };
+    });
+
+    // Trier par score décroissant et filtrer les catégories avec activité
+    const sortedData = categoryData.sort((a, b) => b.trendScore - a.trendScore);
+    const activeCategories = sortedData.filter((c) => c.trendScore > 0);
+
+    if (activeCategories.length === 0) {
+      return {
+        trends: [],
+        generatedAt: new Date(),
+        weekNumber: this.getISOWeekNumber(new Date()),
+        message: 'Pas assez de données pour générer des tendances',
+      };
+    }
+
+    // Préparer le prompt pour l'IA
+    const dataForAI = activeCategories.slice(0, 5).map((c) => ({
+      category: c.categoryLabel,
+      status: c.status,
+      recentExchanges: c.recentExchanges,
+      pendingRequests: c.recentRequests,
+      availableItems: c.availableItems,
+      views: c.totalViews,
+    }));
+
+    const prompt = `Tu es un assistant pour une plateforme d'échange d'objets entre particuliers.
+Analyse ces tendances communautaires et génère des descriptions et recommandations engageantes en français.
+
+DONNÉES DES TENDANCES :
+${JSON.stringify(dataForAI, null, 2)}
+
+Pour chaque catégorie, génère :
+1. Une description courte (1-2 phrases) expliquant la tendance
+2. Une recommandation/call-to-action pour les utilisateurs
+
+Règles :
+- Si status="hot" : forte demande, peu d'offres - encourager à proposer des objets
+- Si status="rising" : activité croissante - mentionner le dynamisme
+- Si status="stable" : activité constante - rassurer sur l'intérêt
+
+Réponds en JSON uniquement :
+{
+  "categories": [
+    {
+      "category": "Électronique",
+      "description": "Les smartphones et tablettes sont très recherchés cette semaine...",
+      "recommendation": "Proposez vos anciens appareils électroniques !"
+    }
+  ]
+}`;
+
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        response_format: { type: 'json_object' },
+        max_tokens: 800,
+        temperature: 0.7,
+      });
+
+      const content = response.choices[0]?.message?.content;
+      if (!content) {
+        throw new ServiceUnavailableException(
+          'Service IA temporairement indisponible',
+        );
+      }
+
+      const aiResponse = JSON.parse(content);
+      const aiCategories = aiResponse.categories || [];
+
+      // Fusionner les descriptions IA avec les données
+      const trends: CategoryTrendDto[] = activeCategories
+        .slice(0, 5)
+        .map((c) => {
+          const aiData = aiCategories.find(
+            (ai: { category: string }) => ai.category === c.categoryLabel,
+          ) || {
+            description: `La catégorie ${c.categoryLabel} est active cette semaine.`,
+            recommendation: `Découvrez les objets ${c.categoryLabel.toLowerCase()} disponibles !`,
+          };
+
+          return {
+            category: c.category,
+            categoryLabel: c.categoryLabel,
+            trendScore: c.trendScore,
+            status: c.status,
+            recentExchanges: c.recentExchanges,
+            recentRequests: c.recentRequests,
+            availableItems: c.availableItems,
+            totalViews: c.totalViews,
+            aiDescription: aiData.description,
+            aiRecommendation: aiData.recommendation,
+          };
+        });
+
+      return {
+        trends,
+        generatedAt: new Date(),
+        weekNumber: this.getISOWeekNumber(new Date()),
+      };
+    } catch (error) {
+      if (
+        error instanceof ServiceUnavailableException ||
+        error instanceof InternalServerErrorException
+      ) {
+        throw error;
+      }
+      const errorCode = (error as { code?: string })?.code || 'unknown';
+      console.error(`Erreur OpenAI trends: ${errorCode}`);
+      throw new ServiceUnavailableException(
+        'Service IA temporairement indisponible',
+      );
+    }
+  }
+
+  private getISOWeekNumber(date: Date): number {
+    const d = new Date(
+      Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
+    );
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
   }
 }

@@ -242,4 +242,42 @@ export class ItemsService {
       })
       .exec();
   }
+
+  /**
+   * Statistiques par catégorie pour l'analyse des tendances
+   */
+  async getCategoryStats(city?: string): Promise<
+    {
+      category: string;
+      availableCount: number;
+      totalViews: number;
+    }[]
+  > {
+    const matchStage: Record<string, unknown> = { status: ItemStatus.AVAILABLE };
+    if (city) {
+      matchStage.city = { $regex: city, $options: 'i' };
+    }
+
+    return this.itemModel
+      .aggregate([
+        { $match: matchStage },
+        {
+          $group: {
+            _id: '$category',
+            availableCount: { $sum: 1 },
+            totalViews: { $sum: '$viewCount' },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            category: '$_id',
+            availableCount: 1,
+            totalViews: 1,
+          },
+        },
+        { $sort: { totalViews: -1 } },
+      ])
+      .exec();
+  }
 }
