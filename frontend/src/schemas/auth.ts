@@ -28,6 +28,12 @@ export const registerSchema = z.object({
     .min(1, 'Le nom est requis')
     .min(2, 'Le nom doit contenir au moins 2 caractères')
     .regex(/^[a-zA-ZÀ-ÿ\s-]+$/, 'Le nom ne peut contenir que des lettres'),
+
+  acceptedTerms: z
+    .boolean()
+    .refine((val) => val === true, {
+      message: 'Vous devez accepter les CGU et la Politique de Confidentialité',
+    }),
 });
 
 /**
