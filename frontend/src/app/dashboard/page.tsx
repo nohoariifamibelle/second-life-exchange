@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { getMyItemsCount } from "@/lib/items-api";
 import { getPendingCount } from "@/lib/exchanges-api";
+import { getSuggestions, ExchangeSuggestion } from "@/lib/ai-api";
+import { SuggestionCard } from "@/components/SuggestionCard";
 
 export default function DashboardPage() {
   const { user, accessToken, isLoading, isAuthenticated, logout } = useAuth();
@@ -13,6 +15,9 @@ export default function DashboardPage() {
   const [itemsCount, setItemsCount] = useState<number>(0);
   const [pendingExchangesCount, setPendingExchangesCount] = useState<number>(0);
   const [isLoadingCounts, setIsLoadingCounts] = useState(true);
+  const [suggestions, setSuggestions] = useState<ExchangeSuggestion[]>([]);
+  const [suggestionsMessage, setSuggestionsMessage] = useState<string>("");
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(true);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -52,6 +57,30 @@ export default function DashboardPage() {
 
     if (isAuthenticated && accessToken) {
       loadCounts();
+    }
+  }, [isAuthenticated, accessToken]);
+
+  // Charger les suggestions IA
+  useEffect(() => {
+    const loadSuggestions = async () => {
+      if (!accessToken) return;
+
+      try {
+        const response = await getSuggestions(accessToken);
+        setSuggestions(response.suggestions);
+        if (response.message) {
+          setSuggestionsMessage(response.message);
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement des suggestions:", error);
+        setSuggestionsMessage("Impossible de charger les suggestions");
+      } finally {
+        setIsLoadingSuggestions(false);
+      }
+    };
+
+    if (isAuthenticated && accessToken) {
+      loadSuggestions();
     }
   }, [isAuthenticated, accessToken]);
 
@@ -155,7 +184,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Section mes objets récents */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-6 mb-8">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-gray-800">Mes objets récents</h3>
             <Link
@@ -180,6 +209,81 @@ export default function DashboardPage() {
             <p className="text-gray-500">
               Vous avez {itemsCount} objet{itemsCount > 1 ? "s" : ""} publié{itemsCount > 1 ? "s" : ""}.
             </p>
+          )}
+        </div>
+
+        {/* Section suggestions d'échanges IA */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-gray-800">Suggestions d&apos;échanges</h3>
+              <span className="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">
+                IA
+              </span>
+            </div>
+          </div>
+
+          {isLoadingSuggestions ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="flex flex-col items-center gap-3">
+                <svg
+                  className="animate-spin h-8 w-8 text-green-600"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                <p className="text-gray-500">Analyse de vos objets en cours...</p>
+              </div>
+            </div>
+          ) : suggestions.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="mb-4">
+                <svg
+                  className="w-12 h-12 mx-auto text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                  />
+                </svg>
+              </div>
+              <p className="text-gray-500 mb-2">
+                {suggestionsMessage || "Aucune suggestion disponible pour le moment"}
+              </p>
+              {itemsCount === 0 && (
+                <Link
+                  href="/items/new"
+                  className="inline-block px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mt-4"
+                >
+                  Publier un objet pour recevoir des suggestions
+                </Link>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {suggestions.map((suggestion, index) => (
+                <SuggestionCard key={index} suggestion={suggestion} />
+              ))}
+            </div>
           )}
         </div>
       </main>

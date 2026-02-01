@@ -8,23 +8,27 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { createItem } from "@/lib/items-api";
+import { generateDescription } from "@/lib/ai-api";
 import {
   createItemSchema,
   type CreateItemFormData,
   categoryLabels,
   conditionLabels,
 } from "@/schemas/item";
+import ImageUpload from "@/components/ui/ImageUpload";
 
 export default function NewItemPage() {
   const { user, accessToken, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
+    watch,
   } = useForm<CreateItemFormData>({
     resolver: zodResolver(createItemSchema),
     defaultValues: {
@@ -45,6 +49,28 @@ export default function NewItemPage() {
       setValue("city", user.city);
     }
   }, [user, setValue]);
+
+  const handleGenerateDescription = async () => {
+    const title = watch("title");
+    const category = watch("category");
+
+    if (!title || !category || !accessToken) {
+      toast.error("Veuillez remplir le titre et la catégorie");
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const description = await generateDescription(accessToken, title, category);
+      setValue("description", description);
+      toast.success("Description générée avec succès !");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Erreur lors de la génération";
+      toast.error(message);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const onSubmit = async (data: CreateItemFormData) => {
     if (!accessToken) return;
@@ -117,9 +143,19 @@ export default function NewItemPage() {
 
             {/* Description */}
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                Description *
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                  Description *
+                </label>
+                <button
+                  type="button"
+                  onClick={handleGenerateDescription}
+                  disabled={isGenerating || !watch("title") || !watch("category")}
+                  className="text-sm text-purple-600 hover:text-purple-700 disabled:text-gray-400 disabled:cursor-not-allowed"
+                >
+                  {isGenerating ? "Génération..." : "✨ Générer avec l'IA"}
+                </button>
+              </div>
               <textarea
                 id="description"
                 rows={5}
@@ -227,12 +263,17 @@ export default function NewItemPage() {
               </div>
             </div>
 
-            {/* Note sur les images */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-700">
-                <strong>Note :</strong> L&apos;upload d&apos;images sera disponible prochainement. Pour l&apos;instant, les objets seront publiés sans photo.
-              </p>
-            </div>
+            {/* Images */}
+            {accessToken && (
+              <ImageUpload
+                value={watch("images") || []}
+                onChange={(urls) => setValue("images", urls)}
+                accessToken={accessToken}
+                maxImages={3}
+                disabled={isSubmitting}
+                error={errors.images?.message}
+              />
+            )}
 
             {/* Boutons */}
             <div className="flex gap-4">

@@ -213,4 +213,33 @@ export class ItemsService {
       .countDocuments({ owner: new Types.ObjectId(ownerId) })
       .exec();
   }
+
+  /**
+   * Récupère les objets disponibles en excluant un propriétaire
+   */
+  async findAvailableExcludingOwner(
+    excludeOwnerId: string,
+    limit = 50,
+  ): Promise<ItemDocument[]> {
+    return this.itemModel
+      .find({
+        status: ItemStatus.AVAILABLE,
+        owner: { $ne: new Types.ObjectId(excludeOwnerId) },
+      })
+      .populate('owner', 'firstName lastName city')
+      .limit(limit)
+      .exec();
+  }
+
+  /**
+   * Récupère les objets disponibles d'un utilisateur
+   */
+  async findAvailableByOwner(ownerId: string): Promise<ItemDocument[]> {
+    return this.itemModel
+      .find({
+        status: ItemStatus.AVAILABLE,
+        owner: new Types.ObjectId(ownerId),
+      })
+      .exec();
+  }
 }
