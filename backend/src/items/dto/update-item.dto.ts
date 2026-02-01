@@ -8,7 +8,11 @@ import {
   ArrayMaxSize,
   Matches,
 } from 'class-validator';
-import { ItemCategory, ItemCondition, ItemStatus } from '../schemas/item.schema';
+import {
+  ItemCategory,
+  ItemCondition,
+  ItemStatus,
+} from '../schemas/item.schema';
 
 export class UpdateItemDto {
   @IsOptional()

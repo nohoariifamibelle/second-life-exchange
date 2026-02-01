@@ -39,10 +39,7 @@ export class ExchangesController {
    * GET /exchanges - Liste les échanges de l'utilisateur
    */
   @Get()
-  async findAll(
-    @Request() req,
-    @Query('type') type?: 'sent' | 'received',
-  ) {
+  async findAll(@Request() req, @Query('type') type?: 'sent' | 'received') {
     const exchanges = await this.exchangesService.findByUser(
       req.user.userId,
       type,
@@ -67,10 +64,8 @@ export class ExchangesController {
     const exchange = await this.exchangesService.findById(id);
 
     // Vérifier que l'utilisateur fait partie de l'échange
-    const isProposer =
-      this.getId(exchange.proposer) === req.user.userId;
-    const isReceiver =
-      this.getId(exchange.receiver) === req.user.userId;
+    const isProposer = this.getId(exchange.proposer) === req.user.userId;
+    const isReceiver = this.getId(exchange.receiver) === req.user.userId;
 
     if (!isProposer && !isReceiver) {
       return { error: "Vous n'avez pas accès à cet échange" };
