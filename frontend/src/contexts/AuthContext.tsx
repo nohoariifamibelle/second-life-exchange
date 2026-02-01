@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 interface User {
@@ -30,30 +30,27 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [refreshToken, setRefreshToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
-
-  // Charger les données depuis sessionStorage au montage
-  useEffect(() => {
-    const storedAccessToken = sessionStorage.getItem("accessToken");
-    const storedRefreshToken = sessionStorage.getItem("refreshToken");
+  // Lazy initializers pour éviter setState dans useEffect
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window === "undefined") return null;
     const storedUser = sessionStorage.getItem("user");
-
-    if (storedAccessToken && storedRefreshToken && storedUser) {
-      setAccessToken(storedAccessToken);
-      setRefreshToken(storedRefreshToken);
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch {
-        // Si le JSON est invalide, on nettoie
-        sessionStorage.removeItem("user");
-      }
+    if (!storedUser) return null;
+    try {
+      return JSON.parse(storedUser) as User;
+    } catch {
+      sessionStorage.removeItem("user");
+      return null;
     }
-    setIsLoading(false);
-  }, []);
+  });
+
+  const [accessToken, setAccessToken] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return sessionStorage.getItem("accessToken");
+  });
+
+  // isLoading est false car le chargement depuis sessionStorage est synchrone
+  const [isLoading] = useState(false);
+  const router = useRouter();
 
   // Fonction de login
   const login = async (email: string, password: string) => {
@@ -80,7 +77,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Mettre à jour le state
     setAccessToken(data.accessToken);
-    setRefreshToken(data.refreshToken);
     setUser(data.user);
 
     // Rediriger vers le dashboard
@@ -93,7 +89,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     sessionStorage.removeItem("refreshToken");
     sessionStorage.removeItem("user");
     setAccessToken(null);
-    setRefreshToken(null);
     setUser(null);
     router.push("/login");
   }, [router]);
