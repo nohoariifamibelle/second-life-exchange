@@ -30,7 +30,8 @@ export class UsersService {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
     // Extraire acceptedTerms du DTO (ne pas le stocker dans le document)
-    const { acceptedTerms, ...userData } = createUserDto;
+    // Note: La validation @Equals(true) dans le DTO garantit déjà que acceptedTerms est true
+    const { acceptedTerms: _acceptedTerms, ...userData } = createUserDto;
 
     // Créer le nouvel utilisateur avec le password haché et la date d'acceptation
     const createdUser = await this.userModel.create({
