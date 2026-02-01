@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { sanitizeMiddleware } from './common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -30,12 +31,16 @@ async function bootstrap() {
     }),
   );
 
-  // Activer la validation globale
+  // Protection contre les injections NoSQL (OWASP A03:2021)
+  // Supprime les opérateurs MongoDB malveillants ($gt, $ne, $where, etc.)
+  app.use(sanitizeMiddleware);
+
+  // Activer la validation globale avec transformation des types
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true, // Retire les propriétés non définies dans le DTO
       forbidNonWhitelisted: true, // Rejette les requêtes avec des propriétés non autorisées
-      transform: true, // Transforme les types automatiquement
+      transform: true, // Transforme les types (nécessaire pour @Transform decorators)
     }),
   );
 

@@ -16,6 +16,7 @@ import { CreateExchangeDto } from './dto/create-exchange.dto';
 import { RespondExchangeDto } from './dto/respond-exchange.dto';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ParseMongoIdPipe } from '../common';
 
 @Controller('exchanges')
 @UseGuards(JwtAuthGuard)
@@ -60,7 +61,7 @@ export class ExchangesController {
    * GET /exchanges/:id - Récupère un échange par son ID
    */
   @Get(':id')
-  async findOne(@Param('id') id: string, @Request() req) {
+  async findOne(@Param('id', ParseMongoIdPipe) id: string, @Request() req) {
     const exchange = await this.exchangesService.findById(id);
 
     // Vérifier que l'utilisateur fait partie de l'échange
@@ -79,7 +80,7 @@ export class ExchangesController {
    */
   @Patch(':id/respond')
   async respond(
-    @Param('id') id: string,
+    @Param('id', ParseMongoIdPipe) id: string,
     @Body() respondExchangeDto: RespondExchangeDto,
     @Request() req,
   ) {
@@ -95,7 +96,7 @@ export class ExchangesController {
    * PATCH /exchanges/:id/cancel - Annuler une proposition
    */
   @Patch(':id/cancel')
-  async cancel(@Param('id') id: string, @Request() req) {
+  async cancel(@Param('id', ParseMongoIdPipe) id: string, @Request() req) {
     const exchange = await this.exchangesService.cancel(id, req.user.userId);
     return this.formatExchangeResponse(exchange);
   }
@@ -104,7 +105,7 @@ export class ExchangesController {
    * PATCH /exchanges/:id/complete - Finaliser un échange
    */
   @Patch(':id/complete')
-  async complete(@Param('id') id: string, @Request() req) {
+  async complete(@Param('id', ParseMongoIdPipe) id: string, @Request() req) {
     const exchange = await this.exchangesService.complete(id, req.user.userId);
     return this.formatExchangeResponse(exchange);
   }
@@ -126,7 +127,7 @@ export class ExchangesController {
    * GET /exchanges/reviews/user/:userId - Récupère les avis d'un utilisateur
    */
   @Get('reviews/user/:userId')
-  async getReviews(@Param('userId') userId: string) {
+  async getReviews(@Param('userId', ParseMongoIdPipe) userId: string) {
     const result = await this.exchangesService.getReviewsForUser(userId);
     return {
       reviews: result.reviews.map((r) => this.formatReviewResponse(r)),

@@ -13,15 +13,18 @@ import {
   ItemCondition,
   ItemStatus,
 } from '../schemas/item.schema';
+import { TrimAndSanitize } from '../../common';
 
 export class UpdateItemDto {
   @IsOptional()
+  @TrimAndSanitize()
   @IsString()
   @MinLength(3, { message: 'Le titre doit contenir au moins 3 caractères' })
   @MaxLength(100, { message: 'Le titre ne peut pas dépasser 100 caractères' })
   title?: string;
 
   @IsOptional()
+  @TrimAndSanitize()
   @IsString()
   @MinLength(10, {
     message: 'La description doit contenir au moins 10 caractères',
@@ -46,6 +49,7 @@ export class UpdateItemDto {
   images?: string[];
 
   @IsOptional()
+  @TrimAndSanitize()
   @IsString()
   @MaxLength(100, { message: 'La ville ne peut pas dépasser 100 caractères' })
   city?: string;

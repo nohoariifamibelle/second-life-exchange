@@ -8,6 +8,7 @@ import {
   MaxLength,
   IsMongoId,
 } from 'class-validator';
+import { TrimAndSanitize } from '../../common';
 
 export class CreateReviewDto {
   @IsString()
@@ -21,6 +22,7 @@ export class CreateReviewDto {
   rating: number;
 
   @IsOptional()
+  @TrimAndSanitize()
   @IsString()
   @MaxLength(500, {
     message: 'Le commentaire ne peut pas dépasser 500 caractères',

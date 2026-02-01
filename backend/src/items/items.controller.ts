@@ -17,6 +17,7 @@ import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
+import { ParseMongoIdPipe } from '../common';
 
 @Controller('items')
 @UseGuards(JwtAuthGuard)
@@ -98,7 +99,7 @@ export class ItemsController {
    */
   @Public()
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseMongoIdPipe) id: string) {
     const item = await this.itemsService.findOneAndIncrementViews(id);
     return this.formatItemResponse(item);
   }
@@ -108,7 +109,7 @@ export class ItemsController {
    */
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseMongoIdPipe) id: string,
     @Body() updateItemDto: UpdateItemDto,
     @Request() req,
   ) {
@@ -125,7 +126,7 @@ export class ItemsController {
    */
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  async remove(@Param('id') id: string, @Request() req) {
+  async remove(@Param('id', ParseMongoIdPipe) id: string, @Request() req) {
     await this.itemsService.remove(id, req.user.userId);
     return { message: 'Objet supprimé avec succès' };
   }
