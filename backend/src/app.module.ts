@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -27,6 +29,29 @@ import { AiModule } from './ai/ai.module';
       inject: [ConfigService],
     }),
 
+    // Rate Limiting - Protection contre les attaques par force brute (OWASP A04)
+    // Configuration avec plusieurs niveaux de limites par IP
+    ThrottlerModule.forRoot([
+      {
+        // Limite courte : 3 requêtes par seconde (burst protection)
+        name: 'short',
+        ttl: 1000,
+        limit: 3,
+      },
+      {
+        // Limite moyenne : 20 requêtes par 10 secondes
+        name: 'medium',
+        ttl: 10000,
+        limit: 20,
+      },
+      {
+        // Limite longue : 100 requêtes par minute (limite par défaut)
+        name: 'long',
+        ttl: 60000,
+        limit: 100,
+      },
+    ]),
+
     UsersModule,
 
     AuthModule,
@@ -40,6 +65,13 @@ import { AiModule } from './ai/ai.module';
     AiModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // Activer le ThrottlerGuard globalement
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
