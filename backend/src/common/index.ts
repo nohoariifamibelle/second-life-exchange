@@ -18,3 +18,6 @@ export {
   SanitizeXssArray,
   TrimAndSanitize,
 } from './decorators/sanitize.decorator';
+
+// Filters
+export { ThrottlerExceptionFilter } from './filters/throttler-exception.filter';

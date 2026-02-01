@@ -3,7 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
-import { sanitizeMiddleware } from './common';
+import { sanitizeMiddleware, ThrottlerExceptionFilter } from './common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -34,6 +34,10 @@ async function bootstrap() {
   // Protection contre les injections NoSQL (OWASP A03:2021)
   // Supprime les opérateurs MongoDB malveillants ($gt, $ne, $where, etc.)
   app.use(sanitizeMiddleware);
+
+  // Filtre global pour les erreurs de rate limiting (OWASP A04)
+  // Retourne un message d'erreur clair avec le temps d'attente
+  app.useGlobalFilters(new ThrottlerExceptionFilter());
 
   // Activer la validation globale avec transformation des types
   app.useGlobalPipes(
