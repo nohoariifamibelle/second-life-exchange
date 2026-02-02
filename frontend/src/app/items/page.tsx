@@ -15,6 +15,7 @@ import {
   type ItemConditionType,
 } from "@/schemas/item";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDebounce, useIsDebouncing } from "@/hooks/useDebounce";
 
 export default function ItemsPage() {
   return (
@@ -37,11 +38,26 @@ function ItemsPageContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Fix hydration mismatch : attendre le montage côté client
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Filtres
   const [category, setCategory] = useState(searchParams.get("category") || "");
   const [condition, setCondition] = useState(searchParams.get("condition") || "");
   const [city, setCity] = useState(searchParams.get("city") || "");
   const [search, setSearch] = useState(searchParams.get("search") || "");
+
+  // Debounce des champs texte (400ms) pour éviter les requêtes API excessives
+  const debouncedSearch = useDebounce(search, 400);
+  const debouncedCity = useDebounce(city, 400);
+
+  // Indicateur de saisie en cours
+  const isTypingSearch = useIsDebouncing(search, debouncedSearch);
+  const isTypingCity = useIsDebouncing(city, debouncedCity);
+  const isTyping = isTypingSearch || isTypingCity;
 
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
 
@@ -71,6 +87,7 @@ function ItemsPageContent() {
           result = await getMyItems(accessToken, currentPage, 12);
         } else {
           // Mode normal : charger tous les objets avec filtres
+          // Utilise les valeurs débouncées pour les champs texte
           const params: ItemsQueryParams = {
             page: currentPage,
             limit: 12,
@@ -78,8 +95,8 @@ function ItemsPageContent() {
 
           if (category) params.category = category;
           if (condition) params.condition = condition;
-          if (city) params.city = city;
-          if (search) params.search = search;
+          if (debouncedCity) params.city = debouncedCity;
+          if (debouncedSearch) params.search = debouncedSearch;
 
           result = await getItems(params);
         }
@@ -94,7 +111,7 @@ function ItemsPageContent() {
     };
 
     loadItems();
-  }, [currentPage, category, condition, city, search, isMyItemsMode, accessToken]);
+  }, [currentPage, category, condition, debouncedCity, debouncedSearch, isMyItemsMode, accessToken]);
 
   // Appliquer les filtres
   const applyFilters = () => {
@@ -133,7 +150,7 @@ function ItemsPageContent() {
             Second Life Exchange
           </Link>
           <div className="flex items-center gap-4">
-            {isAuthenticated ? (
+            {isMounted && isAuthenticated ? (
               <>
                 <Link
                   href="/items/new"
@@ -148,14 +165,14 @@ function ItemsPageContent() {
                   Mon espace
                 </Link>
               </>
-            ) : (
+            ) : isMounted ? (
               <Link
                 href="/login"
                 className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
               >
                 Se connecter
               </Link>
-            )}
+            ) : null}
           </div>
         </div>
       </header>
@@ -184,13 +201,20 @@ function ItemsPageContent() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Recherche
               </label>
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Mot-clé..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Mot-clé..."
+                  className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
+                />
+                {isTypingSearch && (
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                    <div className="w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Catégorie */}
@@ -236,13 +260,20 @@ function ItemsPageContent() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Ville
               </label>
-              <input
-                type="text"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="Ex: Paris..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="Ex: Paris..."
+                  className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
+                />
+                {isTypingCity && (
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                    <div className="w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Boutons */}
@@ -265,9 +296,14 @@ function ItemsPageContent() {
         )}
 
         {/* Contenu */}
-        {isLoading ? (
+        {isLoading || isTyping ? (
           <div className="text-center py-12">
-            <div className="text-lg text-gray-600">Chargement...</div>
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-8 h-8 border-3 border-green-500 border-t-transparent rounded-full animate-spin" />
+              <div className="text-lg text-gray-600">
+                {isTyping ? "Recherche en cours..." : "Chargement..."}
+              </div>
+            </div>
           </div>
         ) : error ? (
           <div className="text-center py-12">
@@ -278,7 +314,7 @@ function ItemsPageContent() {
             <p className="text-gray-600 mb-4">
               {isMyItemsMode ? "Vous n'avez pas encore publié d'objet" : "Aucun objet trouvé"}
             </p>
-            {isAuthenticated && (
+            {isMounted && isAuthenticated && (
               <Link
                 href="/items/new"
                 className="inline-block px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
