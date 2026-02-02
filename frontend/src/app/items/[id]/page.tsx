@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import toast from "react-hot-toast";
+import { getDetailImageUrl } from "@/utils/cloudinary";
 import { useAuth } from "@/contexts/AuthContext";
 import { getItem, deleteItem } from "@/lib/items-api";
 import {
@@ -154,10 +156,13 @@ export default function ItemDetailPage() {
             <div className="md:w-1/2">
               <div className="aspect-square bg-gray-100 relative">
                 {item.images && item.images.length > 0 ? (
-                  <img
-                    src={item.images[0]}
+                  <Image
+                    src={getDetailImageUrl(item.images[0])}
                     alt={item.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover"
+                    priority
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400">

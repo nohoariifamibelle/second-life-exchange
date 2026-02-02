@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import toast from "react-hot-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { getItem, getMyItems } from "@/lib/items-api";
 import { createExchange } from "@/lib/exchanges-api";
 import { type Item } from "@/schemas/item";
+import { getOptimizedImageUrl, getThumbnailUrl } from "@/utils/cloudinary";
 
 export default function ProposeExchangePage() {
   const params = useParams();
@@ -140,12 +142,14 @@ export default function ProposeExchangePage() {
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Objet que vous souhaitez</h2>
           <div className="flex items-center gap-4">
-            <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden">
+            <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden relative">
               {requestedItem.images && requestedItem.images.length > 0 ? (
-                <img
-                  src={requestedItem.images[0]}
+                <Image
+                  src={getOptimizedImageUrl(requestedItem.images[0], { width: 160, height: 160 })}
                   alt={requestedItem.title}
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="80px"
+                  className="object-cover"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400">?</div>
@@ -191,12 +195,14 @@ export default function ProposeExchangePage() {
                       : "border-gray-200 hover:border-gray-300"
                   }`}
                 >
-                  <div className="aspect-square bg-gray-100">
+                  <div className="aspect-square bg-gray-100 relative">
                     {item.images && item.images.length > 0 ? (
-                      <img
-                        src={item.images[0]}
+                      <Image
+                        src={getThumbnailUrl(item.images[0])}
                         alt={item.title}
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="(max-width: 768px) 50vw, 33vw"
+                        className="object-cover"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400">

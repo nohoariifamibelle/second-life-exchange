@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
+import { getOptimizedImageUrl } from "@/utils/cloudinary";
 import { getExchanges } from "@/lib/exchanges-api";
 import {
   type Exchange,
@@ -144,9 +146,11 @@ export default function ExchangesPage() {
                           className="w-16 h-16 bg-gray-100 rounded-lg border-2 border-white overflow-hidden"
                         >
                           {item.images && item.images.length > 0 ? (
-                            <img
-                              src={item.images[0]}
+                            <Image
+                              src={getOptimizedImageUrl(item.images[0], { width: 128, height: 128 })}
                               alt={item.title || ''}
+                              width={64}
+                              height={64}
                               className="w-full h-full object-cover"
                             />
                           ) : (
@@ -174,9 +178,11 @@ export default function ExchangesPage() {
                     <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
                       {exchange.requestedItem ? (
                         exchange.requestedItem.images && exchange.requestedItem.images.length > 0 ? (
-                          <img
-                            src={exchange.requestedItem.images[0]}
+                          <Image
+                            src={getOptimizedImageUrl(exchange.requestedItem.images[0], { width: 128, height: 128 })}
                             alt={exchange.requestedItem.title || ''}
+                            width={64}
+                            height={64}
                             className="w-full h-full object-cover"
                           />
                         ) : (
