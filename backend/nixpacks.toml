@@ -3,9 +3,13 @@
 
 [variables]
 NIXPACKS_NODE_VERSION = "20"
+NPM_CONFIG_CACHE = "/tmp/.npm"
+
+[phases.install]
+cmds = ["npm ci --prefer-offline --no-audit"]
 
 [phases.build]
-cmds = ["npm ci", "npm run build"]
+cmds = ["npm run build"]
 
 [start]
 cmd = "node dist/main"
