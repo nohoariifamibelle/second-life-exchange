@@ -152,6 +152,7 @@ export default function ExchangesPage() {
                               width={64}
                               height={64}
                               className="w-full h-full object-cover"
+                              loading="lazy"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
@@ -184,6 +185,7 @@ export default function ExchangesPage() {
                             width={64}
                             height={64}
                             className="w-full h-full object-cover"
+                            loading="lazy"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">

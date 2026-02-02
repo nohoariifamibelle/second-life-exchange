@@ -50,6 +50,7 @@ export function SuggestionCard({ suggestion }: SuggestionCardProps) {
                   fill
                   sizes="150px"
                   className="object-cover"
+                  loading="lazy"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -102,6 +103,7 @@ export function SuggestionCard({ suggestion }: SuggestionCardProps) {
                   fill
                   sizes="150px"
                   className="object-cover"
+                  loading="lazy"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400">
