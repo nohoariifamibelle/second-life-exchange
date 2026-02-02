@@ -28,6 +28,7 @@ import {
   statusColors,
   type ExchangeStatusType,
 } from "@/schemas/exchange";
+import { EcoImpactCard } from "@/components/EcoImpactCard";
 
 export default function ProfilePage() {
   const { user, accessToken, isLoading, isAuthenticated, logout, updateUser } = useAuth();
@@ -217,6 +218,11 @@ export default function ProfilePage() {
 
       <main className="max-w-3xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold text-gray-800 mb-8">Mon profil</h1>
+
+        {/* Impact écologique */}
+        <div className="mb-6">
+          <EcoImpactCard />
+        </div>
 
         {/* Formulaire de profil */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
