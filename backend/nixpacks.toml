@@ -1,8 +1,14 @@
 # Configuration Nixpacks pour Railway
 # Spécifie explicitement les commandes de build et start
 
+[variables]
+NODE_VERSION = "20"
+
+[phases.setup]
+nixPkgs = ["nodejs_20", "npm"]
+
 [phases.build]
-cmds = ["npm run build"]
+cmds = ["npm ci", "npm run build"]
 
 [start]
 cmd = "node dist/main"
