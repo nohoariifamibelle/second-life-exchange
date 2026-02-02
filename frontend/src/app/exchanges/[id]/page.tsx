@@ -248,6 +248,7 @@ export default function ExchangeDetailPage() {
                           fill
                           sizes="48px"
                           className="object-cover"
+                          loading="lazy"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400">?</div>
@@ -284,6 +285,7 @@ export default function ExchangeDetailPage() {
                         fill
                         sizes="48px"
                         className="object-cover"
+                        loading="lazy"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400">?</div>

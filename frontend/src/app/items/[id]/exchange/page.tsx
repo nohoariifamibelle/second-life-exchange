@@ -150,6 +150,7 @@ export default function ProposeExchangePage() {
                   fill
                   sizes="80px"
                   className="object-cover"
+                  priority
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400">?</div>
@@ -203,6 +204,7 @@ export default function ProposeExchangePage() {
                         fill
                         sizes="(max-width: 768px) 50vw, 33vw"
                         className="object-cover"
+                        loading="lazy"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400">
