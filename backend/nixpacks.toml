@@ -1,0 +1,8 @@
+# Configuration Nixpacks pour Railway
+# Spécifie explicitement les commandes de build et start
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "node dist/main"
