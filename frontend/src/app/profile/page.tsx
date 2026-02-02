@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import Image from "next/image";
 import toast from "react-hot-toast";
+import { getOptimizedImageUrl } from "@/utils/cloudinary";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   updateProfileSchema,
@@ -456,9 +458,11 @@ export default function ProfilePage() {
                             className="w-10 h-10 bg-gray-100 rounded border border-white overflow-hidden"
                           >
                             {item.images && item.images.length > 0 ? (
-                              <img
-                                src={item.images[0]}
+                              <Image
+                                src={getOptimizedImageUrl(item.images[0], { width: 80, height: 80 })}
                                 alt={item.title || ""}
+                                width={40}
+                                height={40}
                                 className="w-full h-full object-cover"
                               />
                             ) : (
@@ -486,9 +490,11 @@ export default function ProfilePage() {
                       <div className="w-10 h-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
                         {exchange.requestedItem ? (
                           exchange.requestedItem.images && exchange.requestedItem.images.length > 0 ? (
-                            <img
-                              src={exchange.requestedItem.images[0]}
+                            <Image
+                              src={getOptimizedImageUrl(exchange.requestedItem.images[0], { width: 80, height: 80 })}
                               alt={exchange.requestedItem.title || ""}
+                              width={40}
+                              height={40}
                               className="w-full h-full object-cover"
                             />
                           ) : (
