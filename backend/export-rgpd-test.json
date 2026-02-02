@@ -1,0 +1,34 @@
+﻿{
+    "exportedAt":  "2026-02-02T16:06:06.456Z",
+    "gdprArticle":  "Article 20 - Droit à la portabilité des données",
+    "user":  {
+                 "_id":  "6980c991272f76f679c461fe",
+                 "email":  "test.export@example.com",
+                 "firstName":  "Jean",
+                 "lastName":  "Dupont",
+                 "isActive":  true,
+                 "role":  "user",
+                 "bio":  "",
+                 "phone":  "",
+                 "city":  "",
+                 "address":  "",
+                 "avatar":  "",
+                 "acceptedTermsAt":  "2026-02-02T15:58:09.454Z",
+                 "createdAt":  "2026-02-02T15:58:09.484Z",
+                 "updatedAt":  "2026-02-02T15:58:09.484Z"
+             },
+    "items":  [
+
+              ],
+    "exchanges":  [
+
+                  ],
+    "reviews":  {
+                    "given":  [
+
+                              ],
+                    "received":  [
+
+                                 ]
+                }
+}

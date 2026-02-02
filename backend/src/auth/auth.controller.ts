@@ -26,7 +26,9 @@ function extractSecurityContext(req: ExpressRequest): SecurityLogContext {
   // Gestion des proxies (X-Forwarded-For) et IP directe
   const forwardedFor = req.headers['x-forwarded-for'];
   const ip =
-    (Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor?.split(',')[0]) ||
+    (Array.isArray(forwardedFor)
+      ? forwardedFor[0]
+      : forwardedFor?.split(',')[0]) ||
     req.ip ||
     req.socket?.remoteAddress ||
     'unknown';

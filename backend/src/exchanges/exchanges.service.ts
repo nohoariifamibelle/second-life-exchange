@@ -371,6 +371,34 @@ export class ExchangesService {
   }
 
   /**
+   * Récupère TOUTES les reviews d'un utilisateur (données et reçues) pour export RGPD
+   * Minimise les données des autres utilisateurs (pas d'email)
+   */
+  async getAllReviewsByUser(userId: string) {
+    const [givenReviews, receivedReviews] = await Promise.all([
+      // Reviews données par l'utilisateur
+      this.reviewModel
+        .find({ reviewer: new Types.ObjectId(userId) })
+        .populate('reviewedUser', 'firstName lastName')
+        .populate('exchange', 'status completedAt')
+        .sort({ createdAt: -1 })
+        .exec(),
+      // Reviews reçues par l'utilisateur
+      this.reviewModel
+        .find({ reviewedUser: new Types.ObjectId(userId) })
+        .populate('reviewer', 'firstName lastName')
+        .populate('exchange', 'status completedAt')
+        .sort({ createdAt: -1 })
+        .exec(),
+    ]);
+
+    return {
+      given: givenReviews,
+      received: receivedReviews,
+    };
+  }
+
+  /**
    * Échanges complétés par catégorie (pour analyse des tendances)
    */
   async getCompletedExchangesByCategory(
