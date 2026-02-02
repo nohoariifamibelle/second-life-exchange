@@ -199,6 +199,7 @@ export default function ImageUpload({
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 33vw, 150px"
+                loading="lazy"
               />
               {!disabled && (
                 <button
