@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { getUserEcoImpact } from "@/lib/stats-api";
 import {
@@ -125,12 +126,12 @@ export function EcoImpactCard() {
               Réalisez votre premier échange pour commencer à économiser du CO2
               et contribuer à l&apos;économie circulaire.
             </p>
-            <a
+            <Link
               href="/items"
               className="inline-block px-6 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors"
             >
               Découvrir les objets
-            </a>
+            </Link>
           </div>
         ) : (
           <>
