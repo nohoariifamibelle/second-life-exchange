@@ -33,7 +33,11 @@ export class UsersController {
    * Rate limité à 1 export par heure pour éviter les abus
    */
   @Get('me/export')
-  @Throttle({ short: { limit: 1, ttl: 3600000 }, medium: { limit: 1, ttl: 3600000 }, long: { limit: 1, ttl: 3600000 } }) // 1 req / 1 heure
+  @Throttle({
+    short: { limit: 1, ttl: 3600000 },
+    medium: { limit: 1, ttl: 3600000 },
+    long: { limit: 1, ttl: 3600000 },
+  }) // 1 req / 1 heure
   @Header('Content-Type', 'application/json')
   @Header('Content-Disposition', 'attachment; filename="my-data-export.json"')
   async exportMyData(@Request() req): Promise<Record<string, unknown>> {
@@ -53,11 +57,8 @@ export class UsersController {
 
     // Nettoyer les données sensibles de l'utilisateur
     const userObj = userData.toObject();
-    const {
-      password: _password,
-      __v: _v,
-      ...safeUserData
-    } = userObj;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, __v, ...safeUserData } = userObj;
 
     // Helper pour minimiser les données utilisateur (ne garder que firstName/lastName)
     const minimizeUser = (user: any) => {
@@ -81,8 +82,12 @@ export class UsersController {
       return {
         ...exchangeObj,
         // Garder toutes les données si c'est l'utilisateur, sinon minimiser
-        proposer: isProposer ? exchangeObj.proposer : minimizeUser(exchangeObj.proposer),
-        receiver: isReceiver ? exchangeObj.receiver : minimizeUser(exchangeObj.receiver),
+        proposer: isProposer
+          ? exchangeObj.proposer
+          : minimizeUser(exchangeObj.proposer),
+        receiver: isReceiver
+          ? exchangeObj.receiver
+          : minimizeUser(exchangeObj.receiver),
       };
     });
 
@@ -116,7 +121,8 @@ export class UsersController {
       items: items.map((item: any) => {
         const itemObj =
           typeof item.toObject === 'function' ? item.toObject() : item;
-        const { __v: _itemV, ...safeItem } = itemObj;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { __v, ...safeItem } = itemObj;
         return safeItem;
       }),
       exchanges: sanitizedExchanges,

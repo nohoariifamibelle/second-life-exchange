@@ -1,10 +1,7 @@
 import { Module, Global } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { SecurityLoggerService } from './services/security-logger.service';
-import {
-  SecurityLog,
-  SecurityLogSchema,
-} from './schemas/security-log.schema';
+import { SecurityLog, SecurityLogSchema } from './schemas/security-log.schema';
 
 @Global()
 @Module({

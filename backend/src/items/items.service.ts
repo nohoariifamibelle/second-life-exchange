@@ -263,7 +263,9 @@ export class ItemsService {
       totalViews: number;
     }[]
   > {
-    const matchStage: Record<string, unknown> = { status: ItemStatus.AVAILABLE };
+    const matchStage: Record<string, unknown> = {
+      status: ItemStatus.AVAILABLE,
+    };
     if (city) {
       matchStage.city = { $regex: city, $options: 'i' };
     }
