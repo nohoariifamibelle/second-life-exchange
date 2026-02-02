@@ -110,7 +110,8 @@ export class StatsService {
     // Trier par CO2 économisé décroissant
     breakdown.sort((a, b) => b.co2Saved - a.co2Saved);
 
-    const equivalentTrees = Math.round((totalCo2 / CO2_PER_TREE_PER_YEAR) * 100) / 100;
+    const equivalentTrees =
+      Math.round((totalCo2 / CO2_PER_TREE_PER_YEAR) * 100) / 100;
 
     return {
       totalExchanges: exchangesWithCategories.length,
@@ -126,7 +127,9 @@ export class StatsService {
    */
   async getCommunityStats(): Promise<CommunityStatsDto> {
     // Compter les utilisateurs actifs
-    const totalUsers = await this.userModel.countDocuments({ isActive: true }).exec();
+    const totalUsers = await this.userModel
+      .countDocuments({ isActive: true })
+      .exec();
 
     // Aggrégation pour les échanges complétés avec catégories
     const exchangesWithCategories = await this.exchangeModel
@@ -196,7 +199,8 @@ export class StatsService {
 
     breakdown.sort((a, b) => b.co2Saved - a.co2Saved);
 
-    const equivalentTrees = Math.round((totalCo2 / CO2_PER_TREE_PER_YEAR) * 100) / 100;
+    const equivalentTrees =
+      Math.round((totalCo2 / CO2_PER_TREE_PER_YEAR) * 100) / 100;
 
     return {
       totalUsers,

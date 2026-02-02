@@ -36,7 +36,7 @@ export class CreateUserDto {
 
   @IsBoolean({ message: 'Le consentement doit être un booléen' })
   @Equals(true, {
-    message: "Vous devez accepter les CGU et la Politique de Confidentialité",
+    message: 'Vous devez accepter les CGU et la Politique de Confidentialité',
   })
   acceptedTerms: boolean;
 }
