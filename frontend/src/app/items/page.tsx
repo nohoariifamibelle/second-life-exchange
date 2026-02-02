@@ -2,7 +2,9 @@
 
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
+import { getThumbnailUrl } from "@/utils/cloudinary";
 import { getItems, getMyItems, type ItemsQueryParams } from "@/lib/items-api";
 import {
   type Item,
@@ -298,10 +300,12 @@ function ItemsPageContent() {
                   {/* Image */}
                   <div className="aspect-square bg-gray-100 relative">
                     {item.images && item.images.length > 0 ? (
-                      <img
-                        src={item.images[0]}
+                      <Image
+                        src={getThumbnailUrl(item.images[0])}
                         alt={item.title}
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        className="object-cover"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400">

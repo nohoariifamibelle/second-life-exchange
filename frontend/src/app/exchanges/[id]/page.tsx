@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import toast from "react-hot-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { getOptimizedImageUrl } from "@/utils/cloudinary";
 import {
   getExchange,
   respondToExchange,
@@ -238,9 +240,15 @@ export default function ExchangeDetailPage() {
               <div className="space-y-2">
                 {exchange.offeredItems.map((item) => (
                   <div key={item.id} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                    <div className="w-12 h-12 bg-gray-200 rounded overflow-hidden">
+                    <div className="w-12 h-12 bg-gray-200 rounded overflow-hidden relative">
                       {item.images && item.images.length > 0 ? (
-                        <img src={item.images[0]} alt={item.title || ''} className="w-full h-full object-cover" />
+                        <Image
+                          src={getOptimizedImageUrl(item.images[0], { width: 96, height: 96 })}
+                          alt={item.title || ''}
+                          fill
+                          sizes="48px"
+                          className="object-cover"
+                        />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400">?</div>
                       )}
@@ -268,12 +276,14 @@ export default function ExchangeDetailPage() {
               </p>
               {exchange.requestedItem ? (
                 <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                  <div className="w-12 h-12 bg-gray-200 rounded overflow-hidden">
+                  <div className="w-12 h-12 bg-gray-200 rounded overflow-hidden relative">
                     {exchange.requestedItem.images && exchange.requestedItem.images.length > 0 ? (
-                      <img
-                        src={exchange.requestedItem.images[0]}
+                      <Image
+                        src={getOptimizedImageUrl(exchange.requestedItem.images[0], { width: 96, height: 96 })}
                         alt={exchange.requestedItem.title || ''}
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="48px"
+                        className="object-cover"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400">?</div>

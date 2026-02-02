@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ExchangeSuggestion } from "@/lib/ai-api";
+import { getThumbnailUrl } from "@/utils/cloudinary";
 
 interface SuggestionCardProps {
   suggestion: ExchangeSuggestion;
@@ -44,9 +45,10 @@ export function SuggestionCard({ suggestion }: SuggestionCardProps) {
             <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
               {userItem.images.length > 0 ? (
                 <Image
-                  src={userItem.images[0]}
+                  src={getThumbnailUrl(userItem.images[0])}
                   alt={userItem.title}
                   fill
+                  sizes="150px"
                   className="object-cover"
                 />
               ) : (
@@ -95,9 +97,10 @@ export function SuggestionCard({ suggestion }: SuggestionCardProps) {
             <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
               {suggestedItem.images.length > 0 ? (
                 <Image
-                  src={suggestedItem.images[0]}
+                  src={getThumbnailUrl(suggestedItem.images[0])}
                   alt={suggestedItem.title}
                   fill
+                  sizes="150px"
                   className="object-cover"
                 />
               ) : (
