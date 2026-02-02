@@ -2,10 +2,7 @@
 # Spécifie explicitement les commandes de build et start
 
 [variables]
-NODE_VERSION = "20"
-
-[phases.setup]
-nixPkgs = ["nodejs_20", "npm"]
+NIXPACKS_NODE_VERSION = "20"
 
 [phases.build]
 cmds = ["npm ci", "npm run build"]
