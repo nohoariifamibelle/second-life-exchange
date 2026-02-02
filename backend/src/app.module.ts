@@ -11,6 +11,7 @@ import { ItemsModule } from './items/items.module';
 import { ExchangesModule } from './exchanges/exchanges.module';
 import { UploadModule } from './upload/upload.module';
 import { AiModule } from './ai/ai.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -51,6 +52,9 @@ import { AiModule } from './ai/ai.module';
         limit: 100,
       },
     ]),
+
+    // Module commun avec SecurityLoggerService (OWASP A09)
+    CommonModule,
 
     UsersModule,
 
