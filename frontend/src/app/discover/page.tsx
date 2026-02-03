@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, startTransition } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -16,13 +16,9 @@ export default function DiscoverPage() {
 
   // Éviter les erreurs d'hydratation en attendant le montage côté client
   useEffect(() => {
-    let mounted = true;
-    if (mounted) {
+    startTransition(() => {
       setIsMounted(true);
-    }
-    return () => {
-      mounted = false;
-    };
+    });
   }, []);
 
   return (
