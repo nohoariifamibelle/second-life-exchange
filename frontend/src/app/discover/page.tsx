@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useState, startTransition } from "react";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   CommunityStats,
   TipsSection,
@@ -9,6 +11,16 @@ import {
 } from "@/components/home";
 
 export default function DiscoverPage() {
+  const { isAuthenticated, logout } = useAuth();
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Éviter les erreurs d'hydratation en attendant le montage côté client
+  useEffect(() => {
+    startTransition(() => {
+      setIsMounted(true);
+    });
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -18,30 +30,55 @@ export default function DiscoverPage() {
             ♻️ Second Life Exchange
           </Link>
           <nav className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium"
-            >
-              Accueil
-            </Link>
-            <Link
-              href="/items"
-              className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium"
-            >
-              Objets
-            </Link>
-            <Link
-              href="/login"
-              className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium"
-            >
-              Connexion
-            </Link>
-            <Link
-              href="/register"
-              className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-            >
-              Inscription
-            </Link>
+            {isMounted && isAuthenticated ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium"
+                >
+                  Mon espace
+                </Link>
+                <Link
+                  href="/profile"
+                  className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium"
+                >
+                  Mon profil
+                </Link>
+                <button
+                  onClick={logout}
+                  className="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium"
+                >
+                  Déconnexion
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/"
+                  className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium"
+                >
+                  Accueil
+                </Link>
+                <Link
+                  href="/items"
+                  className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium"
+                >
+                  Objets
+                </Link>
+                <Link
+                  href="/login"
+                  className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium"
+                >
+                  Connexion
+                </Link>
+                <Link
+                  href="/register"
+                  className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                >
+                  Inscription
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       </header>
@@ -161,27 +198,55 @@ export default function DiscoverPage() {
         {/* CTA */}
         <section className="py-16">
           <div className="bg-gradient-to-br from-green-600 to-emerald-700 rounded-2xl p-12 text-white text-center">
-            <h2 className="text-3xl font-bold mb-4">
-              Prêt à agir pour la planète ?
-            </h2>
-            <p className="text-green-100 mb-8 max-w-2xl mx-auto">
-              Rejoignez Second Life Exchange et commencez à échanger vos objets.
-              Chaque échange compte pour un avenir plus durable.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Link
-                href="/register"
-                className="px-8 py-3 bg-white text-green-600 font-semibold rounded-lg hover:bg-green-50 transition-colors shadow-lg"
-              >
-                Créer mon compte
-              </Link>
-              <Link
-                href="/items"
-                className="px-8 py-3 bg-transparent text-white font-semibold rounded-lg hover:bg-white/10 transition-colors border-2 border-white/50"
-              >
-                Voir les objets
-              </Link>
-            </div>
+            {isMounted && isAuthenticated ? (
+              <>
+                <h2 className="text-3xl font-bold mb-4">
+                  Continuez à agir pour la planète !
+                </h2>
+                <p className="text-green-100 mb-8 max-w-2xl mx-auto">
+                  Publiez vos objets ou parcourez ceux de la communauté.
+                  Chaque échange compte pour un avenir plus durable.
+                </p>
+                <div className="flex flex-wrap justify-center gap-4">
+                  <Link
+                    href="/items/new"
+                    className="px-8 py-3 bg-white text-green-600 font-semibold rounded-lg hover:bg-green-50 transition-colors shadow-lg"
+                  >
+                    Publier un objet
+                  </Link>
+                  <Link
+                    href="/dashboard"
+                    className="px-8 py-3 bg-transparent text-white font-semibold rounded-lg hover:bg-white/10 transition-colors border-2 border-white/50"
+                  >
+                    Mon tableau de bord
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="text-3xl font-bold mb-4">
+                  Prêt à agir pour la planète ?
+                </h2>
+                <p className="text-green-100 mb-8 max-w-2xl mx-auto">
+                  Rejoignez Second Life Exchange et commencez à échanger vos objets.
+                  Chaque échange compte pour un avenir plus durable.
+                </p>
+                <div className="flex flex-wrap justify-center gap-4">
+                  <Link
+                    href="/register"
+                    className="px-8 py-3 bg-white text-green-600 font-semibold rounded-lg hover:bg-green-50 transition-colors shadow-lg"
+                  >
+                    Créer mon compte
+                  </Link>
+                  <Link
+                    href="/items"
+                    className="px-8 py-3 bg-transparent text-white font-semibold rounded-lg hover:bg-white/10 transition-colors border-2 border-white/50"
+                  >
+                    Voir les objets
+                  </Link>
+                </div>
+              </>
+            )}
           </div>
         </section>
       </main>

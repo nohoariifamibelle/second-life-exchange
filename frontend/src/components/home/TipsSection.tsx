@@ -84,7 +84,7 @@ export default function TipsSection() {
 
   return (
     <section className="py-16">
-      <h2 className="text-2xl font-bold text-center mb-2">
+      <h2 className="text-2xl font-bold text-center mb-2 text-gray-900">
         Conseils Pratiques
       </h2>
       <p className="text-center text-gray-500 mb-8">

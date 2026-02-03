@@ -28,7 +28,7 @@ const ecoFacts = [
 export default function EcoFacts() {
   return (
     <section className="py-16">
-      <h2 className="text-2xl font-bold text-center mb-2">Le Saviez-Vous ?</h2>
+      <h2 className="text-2xl font-bold text-center mb-2 text-gray-900">Le Saviez-Vous ?</h2>
       <p className="text-center text-gray-500 mb-8">
         Des chiffres qui font réfléchir
       </p>
