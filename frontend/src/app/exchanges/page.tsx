@@ -79,6 +79,24 @@ export default function ExchangesPage() {
           </Link>
           <div className="flex items-center gap-4">
             <Link
+              href="/"
+              className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium"
+            >
+              Accueil
+            </Link>
+            <Link
+              href="/discover"
+              className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium"
+            >
+              Découverte
+            </Link>
+            <Link
+              href="/items"
+              className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium"
+            >
+              Objets
+            </Link>
+            <Link
               href="/dashboard"
               className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
             >

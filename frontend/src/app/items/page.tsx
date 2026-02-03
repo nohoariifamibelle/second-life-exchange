@@ -144,12 +144,24 @@ function ItemsPageContent() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow">
+      <header className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link href="/" className="text-xl font-bold text-green-600 hover:text-green-700">
-            Second Life Exchange
+            ♻️ Second Life Exchange
           </Link>
-          <div className="flex items-center gap-4">
+          <nav className="flex items-center gap-4">
+            <Link
+              href="/"
+              className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium hidden md:block"
+            >
+              Accueil
+            </Link>
+            <Link
+              href="/discover"
+              className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium hidden md:block"
+            >
+              Découverte
+            </Link>
             {isMounted && isAuthenticated ? (
               <>
                 <Link
@@ -166,16 +178,41 @@ function ItemsPageContent() {
                 </Link>
               </>
             ) : isMounted ? (
-              <Link
-                href="/login"
-                className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-              >
-                Se connecter
-              </Link>
+              <>
+                <Link
+                  href="/login"
+                  className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium"
+                >
+                  Connexion
+                </Link>
+                <Link
+                  href="/register"
+                  className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  S&apos;inscrire
+                </Link>
+              </>
             ) : null}
-          </div>
+          </nav>
         </div>
       </header>
+
+      {/* Bannière incitative pour les non-connectés */}
+      {isMounted && !isAuthenticated && !isMyItemsMode && (
+        <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3">
+          <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p className="text-sm text-center sm:text-left">
+              <span className="font-semibold">🎉 Créez votre compte gratuit</span> et commencez à échanger dès aujourd&apos;hui !
+            </p>
+            <Link
+              href="/register"
+              className="px-4 py-1.5 bg-white text-green-600 rounded-lg text-sm font-medium hover:bg-green-50 transition-colors whitespace-nowrap"
+            >
+              Inscription gratuite →
+            </Link>
+          </div>
+        </div>
+      )}
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
@@ -404,6 +441,38 @@ function ItemsPageContent() {
                 >
                   Suivant
                 </button>
+              </div>
+            )}
+
+            {/* CTA pour les non-connectés */}
+            {isMounted && !isAuthenticated && (
+              <div className="mt-12 bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl p-8 border border-green-200">
+                <div className="max-w-2xl mx-auto text-center">
+                  <span className="text-4xl mb-4 block">🤝</span>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                    Vous avez trouvé un objet qui vous plaît ?
+                  </h2>
+                  <p className="text-gray-600 mb-6">
+                    Créez votre compte gratuitement pour proposer un échange et entrer en contact avec le propriétaire. Rejoignez notre communauté de plus de 500 échangeurs !
+                  </p>
+                  <div className="flex flex-col sm:flex-row justify-center gap-3">
+                    <Link
+                      href="/register"
+                      className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-lg"
+                    >
+                      Créer mon compte gratuit
+                    </Link>
+                    <Link
+                      href="/login"
+                      className="px-6 py-3 bg-white text-green-600 font-semibold rounded-lg hover:bg-green-50 transition-colors border border-green-200"
+                    >
+                      J&apos;ai déjà un compte
+                    </Link>
+                  </div>
+                  <p className="mt-4 text-sm text-gray-500">
+                    ✓ 100% gratuit &nbsp; ✓ Sans engagement &nbsp; ✓ Inscription en 30 secondes
+                  </p>
+                </div>
               </div>
             )}
           </>
