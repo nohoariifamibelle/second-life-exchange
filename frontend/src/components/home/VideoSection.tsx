@@ -1,12 +1,12 @@
 const videos = [
   {
-    id: "seAAi2EDQTU",
-    title: "L'économie circulaire expliquée en 2 minutes",
+    id: "__0Spwj8DkM",
+    title: "Qu'est-ce que l'économie circulaire ?",
     description: "Comprendre les principes de l'économie circulaire",
   },
   {
     id: "zCRKvDyyHmI",
-    title: "Pourquoi le réemploi est essentiel",
+    title: "Expliquer l'économie circulaire et comment la société peut repenser le progrès",
     description: "L'impact environnemental de nos modes de consommation",
   },
 ];
@@ -32,7 +32,7 @@ export default function VideoSection() {
   return (
     <section className="py-16 bg-gray-50 -mx-4 px-4 md:-mx-8 md:px-8 hidden md:block">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-2xl font-bold text-center mb-2">
+        <h2 className="text-2xl font-bold text-center mb-2 text-gray-900">
           Comprendre l&apos;économie circulaire
         </h2>
         <p className="text-center text-gray-500 mb-8">
