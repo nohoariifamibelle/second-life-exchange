@@ -14,7 +14,9 @@ export default function DiscoverPage() {
   const { isAuthenticated, isLoading, logout } = useAuth();
   const [isMounted, setIsMounted] = useState(false);
 
+  // Éviter les erreurs d'hydratation en attendant le montage côté client
   useEffect(() => {
+    // eslint-disable-next-line react-compiler/react-compiler
     setIsMounted(true);
   }, []);
 
