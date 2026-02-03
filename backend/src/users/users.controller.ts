@@ -53,11 +53,8 @@ export class UsersController {
 
     // Nettoyer les données sensibles de l'utilisateur
     const userObj = userData.toObject();
-    const {
-      password: _password,
-      __v: _v,
-      ...safeUserData
-    } = userObj;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _password, __v: _v, ...safeUserData } = userObj;
 
     // Helper pour minimiser les données utilisateur (ne garder que firstName/lastName)
     const minimizeUser = (user: any) => {
@@ -116,6 +113,7 @@ export class UsersController {
       items: items.map((item: any) => {
         const itemObj =
           typeof item.toObject === 'function' ? item.toObject() : item;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { __v: _itemV, ...safeItem } = itemObj;
         return safeItem;
       }),
