@@ -35,22 +35,22 @@ import { CommonModule } from './common/common.module';
     // Configuration avec plusieurs niveaux de limites par IP
     ThrottlerModule.forRoot([
       {
-        // Limite courte : 3 requêtes par seconde (burst protection)
+        // Limite courte : 15 requêtes par seconde (burst protection)
         name: 'short',
         ttl: 1000,
-        limit: 3,
+        limit: 15,
       },
       {
-        // Limite moyenne : 20 requêtes par 10 secondes
+        // Limite moyenne : 60 requêtes par 10 secondes
         name: 'medium',
         ttl: 10000,
-        limit: 20,
+        limit: 60,
       },
       {
-        // Limite longue : 100 requêtes par minute (limite par défaut)
+        // Limite longue : 200 requêtes par minute (limite par défaut)
         name: 'long',
         ttl: 60000,
-        limit: 100,
+        limit: 200,
       },
     ]),
 

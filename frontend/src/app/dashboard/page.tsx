@@ -141,6 +141,24 @@ export default function DashboardPage() {
             Second Life Exchange
           </Link>
           <div className="flex items-center gap-4">
+            <Link
+              href="/"
+              className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium"
+            >
+              Accueil
+            </Link>
+            <Link
+              href="/discover"
+              className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium"
+            >
+              Découverte
+            </Link>
+            <Link
+              href="/items"
+              className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium"
+            >
+              Objets
+            </Link>
             <span className="text-gray-700">
               Bonjour, {user.firstName} {user.lastName}
             </span>

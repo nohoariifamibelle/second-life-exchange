@@ -17,10 +17,15 @@ import {
   CommunityTrendsResponseDto,
   TrendStatus,
 } from './dto/community-trends.dto';
+import { EcoTip, EcoTipsResponseDto } from './dto/eco-tips.dto';
 
 @Injectable()
 export class AiService {
   private openai: OpenAI;
+
+  // Cache pour les conseils écologiques (24h)
+  private cachedTips: { tips: EcoTip[]; generatedAt: Date } | null = null;
+  private readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 heures en ms
 
   constructor(
     private configService: ConfigService,
@@ -447,6 +452,92 @@ Réponds en JSON uniquement :
       }
       const errorCode = (error as { code?: string })?.code || 'unknown';
       console.error(`Erreur OpenAI trends: ${errorCode}`);
+      throw new ServiceUnavailableException(
+        'Service IA temporairement indisponible',
+      );
+    }
+  }
+
+  /**
+   * Génère des conseils écologiques via OpenAI
+   * Cache de 24h pour économiser les appels API
+   */
+  async generateEcoTips(): Promise<EcoTipsResponseDto> {
+    // Vérifie le cache
+    if (
+      this.cachedTips &&
+      Date.now() - this.cachedTips.generatedAt.getTime() < this.CACHE_DURATION
+    ) {
+      return {
+        tips: this.cachedTips.tips,
+        generatedAt: this.cachedTips.generatedAt.toISOString(),
+      };
+    }
+
+    const prompt = `Tu es un expert en économie circulaire et développement durable.
+Génère exactement 4 conseils pratiques pour encourager le réemploi et l'échange d'objets de seconde main.
+
+Chaque conseil doit être :
+- Concret et actionnable
+- Positif et motivant
+- En lien avec l'échange d'objets (vêtements, électronique, livres, meubles, jouets)
+
+Réponds UNIQUEMENT en JSON valide avec ce format exact :
+{
+  "tips": [
+    {
+      "icon": "emoji pertinent",
+      "title": "Titre court (3-5 mots)",
+      "description": "Description en 1-2 phrases (max 150 caractères)"
+    }
+  ]
+}`;
+
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        response_format: { type: 'json_object' },
+        temperature: 0.7,
+        max_tokens: 500,
+      });
+
+      const content = response.choices[0]?.message?.content;
+
+      if (!content) {
+        throw new ServiceUnavailableException(
+          'Service IA temporairement indisponible',
+        );
+      }
+
+      const parsed = JSON.parse(content);
+
+      // Valide le format de la réponse
+      if (!parsed.tips || !Array.isArray(parsed.tips)) {
+        throw new ServiceUnavailableException(
+          'Format de réponse IA invalide',
+        );
+      }
+
+      // Met en cache
+      this.cachedTips = {
+        tips: parsed.tips,
+        generatedAt: new Date(),
+      };
+
+      return {
+        tips: parsed.tips,
+        generatedAt: this.cachedTips.generatedAt.toISOString(),
+      };
+    } catch (error) {
+      if (
+        error instanceof ServiceUnavailableException ||
+        error instanceof InternalServerErrorException
+      ) {
+        throw error;
+      }
+      const errorCode = (error as { code?: string })?.code || 'unknown';
+      console.error(`Erreur OpenAI eco-tips: ${errorCode}`);
       throw new ServiceUnavailableException(
         'Service IA temporairement indisponible',
       );
