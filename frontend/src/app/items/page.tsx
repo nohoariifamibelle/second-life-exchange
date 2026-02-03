@@ -150,18 +150,6 @@ function ItemsPageContent() {
             ♻️ Second Life Exchange
           </Link>
           <nav className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium hidden md:block"
-            >
-              Accueil
-            </Link>
-            <Link
-              href="/discover"
-              className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium hidden md:block"
-            >
-              Découverte
-            </Link>
             {isMounted && isAuthenticated ? (
               <>
                 <Link
