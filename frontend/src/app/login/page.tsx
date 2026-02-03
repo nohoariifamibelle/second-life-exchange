@@ -37,7 +37,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-        <h1 className="text-2xl text-blue-600 font-bold text-center mb-6">
+        <h1 className="text-2xl text-green-600 font-bold text-center mb-6">
           Connexion
         </h1>
 
@@ -50,7 +50,7 @@ export default function LoginPage() {
               id="email"
               type="email"
               {...register("email")}
-              className={`px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              className={`px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-black ${
                 errors.email ? "border-red-500" : "border-gray-300"
               }`}
               disabled={isLoading}
@@ -68,7 +68,7 @@ export default function LoginPage() {
               id="password"
               type="password"
               {...register("password")}
-              className={`px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              className={`px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-black ${
                 errors.password ? "border-red-500" : "border-gray-300"
               }`}
               disabled={isLoading}
@@ -81,7 +81,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? "Connexion en cours..." : "Se connecter"}
           </button>
@@ -89,7 +89,7 @@ export default function LoginPage() {
 
         <p className="mt-4 text-center text-sm text-gray-600">
           Pas encore de compte ?{" "}
-          <Link href="/register" className="text-blue-600 hover:underline">
+          <Link href="/register" className="text-green-600 hover:underline">
             S&apos;inscrire
           </Link>
         </p>
