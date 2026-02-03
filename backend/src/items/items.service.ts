@@ -244,6 +244,16 @@ export class ItemsService {
   }
 
   /**
+   * Récupère TOUS les objets d'un utilisateur (pour export RGPD)
+   */
+  async findAllByOwner(ownerId: string): Promise<ItemDocument[]> {
+    return this.itemModel
+      .find({ owner: new Types.ObjectId(ownerId) })
+      .sort({ createdAt: -1 })
+      .exec();
+  }
+
+  /**
    * Statistiques par catégorie pour l'analyse des tendances
    */
   async getCategoryStats(city?: string): Promise<
@@ -253,7 +263,9 @@ export class ItemsService {
       totalViews: number;
     }[]
   > {
-    const matchStage: Record<string, unknown> = { status: ItemStatus.AVAILABLE };
+    const matchStage: Record<string, unknown> = {
+      status: ItemStatus.AVAILABLE,
+    };
     if (city) {
       matchStage.city = { $regex: city, $options: 'i' };
     }

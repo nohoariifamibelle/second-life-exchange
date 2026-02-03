@@ -1,0 +1,18 @@
+# Configuration Nixpacks pour Railway
+# Spécifie explicitement les commandes de build et start
+
+[variables]
+NIXPACKS_NODE_VERSION = "20"
+NPM_CONFIG_CACHE = "/tmp/.npm"
+# Désactive le cache Nixpacks pour éviter l'erreur EBUSY
+NIXPACKS_NO_CACHE = "1"
+
+[phases.install]
+# Supprime le dossier .cache problématique avant npm ci
+cmds = ["rm -rf node_modules/.cache 2>/dev/null || true", "npm ci --prefer-offline --no-audit"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "node dist/main"

@@ -50,7 +50,11 @@ export class SecurityLoggerService {
   async logLoginFailure(
     email: string,
     context: SecurityLogContext,
-    reason: 'user_not_found' | 'invalid_password' | 'account_locked' | 'rate_limited',
+    reason:
+      | 'user_not_found'
+      | 'invalid_password'
+      | 'account_locked'
+      | 'rate_limited',
   ): Promise<void> {
     const timestamp = new Date().toISOString();
     this.logger.warn(
