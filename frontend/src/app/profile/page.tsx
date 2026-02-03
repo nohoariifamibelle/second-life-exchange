@@ -203,24 +203,6 @@ export default function ProfilePage() {
             Second Life Exchange
           </Link>
           <div className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium"
-            >
-              Accueil
-            </Link>
-            <Link
-              href="/discover"
-              className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium"
-            >
-              Découverte
-            </Link>
-            <Link
-              href="/items"
-              className="text-gray-600 hover:text-green-600 transition-colors text-sm font-medium"
-            >
-              Objets
-            </Link>
             <span className="text-gray-700">
               {user.firstName} {user.lastName}
             </span>
@@ -235,7 +217,15 @@ export default function ProfilePage() {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-800 mb-8">Mon profil</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold text-gray-800">Mon profil</h1>
+          <Link
+            href="/discover"
+            className="px-6 py-3 bg-white border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Découverte
+          </Link>
+        </div>
 
         {/* Impact écologique */}
         <div className="mb-6">
